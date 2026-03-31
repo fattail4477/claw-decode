@@ -204,13 +204,13 @@ Unknown. The feature flags suggest they're being tested internally. Some (like `
 
 ## 👤 About
 
-Created by **[Avery C](https://linkedin.com/in/averychai/)** — founder building in the AI agent space.
+Created by **[Avery Chai](https://linkedin.com/in/averychai/)** — founder building in the AI agent space.
 
 This analysis was created to help the developer community understand production AI agent architecture patterns. The best way to advance the field is to learn from the best implementations.
 
 **Follow for more:**
 - Twitter/X: [@chatoliciuh](https://x.com/YOUR_HANDLE)
-- LinkedIn: [Avery C](https://linkedin.com/in/averychai/)
+- LinkedIn: [Avery Chai](https://linkedin.com/in/averychai/)
 
 ---
 
