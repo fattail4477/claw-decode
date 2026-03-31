@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claw Decode — Inside Claude Code's Leaked Source</title>
+<meta property="og:title" content="Claw Decode — Inside Claude Code's Leaked Source">
+<meta property="og:description" content="512,000 lines. 43 tools. 7 hidden features. Everything Anthropic was hiding.">
+<meta property="og:url" content="https://fattail4477.github.io/claw-decode/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://fattail4477.github.io/claw-decode/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claw Decode — Inside Claude Code's Leaked Source">
+<meta name="twitter:description" content="512,000 lines. 43 tools. 7 hidden features. Everything Anthropic was hiding.">
+<meta name="description" content="Claude Code's source leaked. We read every line. Here's what Anthropic was hiding inside 512,000 lines of code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--border:#30363d;
+  --text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--accent2:#f78166;
+  --green:#4ade80;--blue:#60a5fa;--purple:#c084fc;--gold:#fbbf24;
+  --red:#f85149;--common:#888;--uncommon:#4ade80;--rare:#60a5fa;
+  --epic:#c084fc;--legendary:#fbbf24;
+}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,17,23,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 0}
+nav .container{display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-weight:900;font-size:1.1rem;letter-spacing:-.02em}
+nav .logo span{color:var(--accent)}
+nav ul{list-style:none;display:flex;gap:24px}
+nav ul a{color:var(--text2);font-size:.85rem;font-weight:600;transition:color .2s}
+nav ul a:hover{color:var(--text);text-decoration:none}
+@media(max-width:768px){nav ul{display:none}}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(88,166,255,.06) 0%,transparent 60%);animation:pulse 8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+.hero-content{position:relative;z-index:1}
+.hero h1{font-size:clamp(2.2rem,5vw,4rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:24px}
+.hero h1 .num{color:var(--accent);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.hero h1 .sep{color:var(--text2);margin:0 .15em;font-weight:400}
+.hero .subtitle{font-size:clamp(1rem,2vw,1.35rem);color:var(--text2);max-width:700px;margin:0 auto 40px;line-height:1.5}
+.hero .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;font-weight:700;font-size:.95rem;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--accent);color:#0d1117}.btn-primary:hover{background:#79c0ff;text-decoration:none}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--text2);text-decoration:none}
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);animation:bob 2s ease-in-out infinite;color:var(--text2);font-size:1.5rem}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(10px)}}
+
+/* SECTIONS */
+section{padding:100px 0}
+.section-label{text-transform:uppercase;font-size:.75rem;font-weight:700;letter-spacing:.15em;color:var(--accent);margin-bottom:8px}
+.section-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;letter-spacing:-.02em;margin-bottom:16px}
+.section-desc{color:var(--text2);font-size:1.05rem;max-width:650px;margin-bottom:48px}
+
+/* PET ZOO */
+#pets{background:var(--bg2)}
+.pet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.pet-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:transform .2s,border-color .3s}
+.pet-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+.pet-art{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.35;white-space:pre;min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--text);margin-bottom:12px}
+.pet-name{font-weight:700;font-size:1rem;margin-bottom:6px;text-transform:capitalize}
+.rarity-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+
+/* UNDERCOVER */
+#undercover{background:linear-gradient(135deg,rgba(248,81,73,.08),rgba(248,81,73,.02));border-top:2px solid var(--red);border-bottom:2px solid var(--red)}
+#undercover .warning-banner{display:flex;align-items:center;gap:12px;background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.3);border-radius:12px;padding:20px 24px;margin-bottom:32px;font-size:1.1rem;font-weight:700;color:var(--red)}
+#undercover .code-block{background:#0d1117;border:1px solid var(--border);border-radius:12px;padding:24px;font-family:'JetBrains Mono',monospace;font-size:.85rem;line-height:1.7;color:var(--text);overflow-x:auto;margin-bottom:24px;position:relative}
+#undercover .code-block::before{content:'SYSTEM PROMPT';position:absolute;top:8px;right:12px;font-size:.6rem;color:var(--text2);letter-spacing:.1em;font-weight:700}
+.never-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:16px}
+.never-item{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-radius:8px;padding:12px 16px;font-size:.9rem;color:var(--red)}
+.never-item strong{color:#ff7b72}
+
+/* COMPARISON */
+#comparison .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:768px){#comparison .compare-grid{grid-template-columns:1fr}}
+.compare-panel{border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.compare-panel.external .compare-header{background:rgba(74,222,128,.12);color:var(--green);border-bottom:2px solid var(--green)}
+.compare-panel.internal .compare-header{background:rgba(247,129,102,.12);color:var(--accent2);border-bottom:2px solid var(--accent2)}
+.compare-header{padding:16px 20px;font-weight:700;font-size:1.05rem}
+.compare-body{background:var(--bg2);padding:0}
+.compare-row{padding:14px 20px;border-bottom:1px solid var(--border);font-size:.9rem}
+.compare-row:last-child{border:none}
+.compare-row .label{color:var(--text2);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.compare-row .value{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem}
+
+/* SECRETS */
+.secrets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.secret-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.secret-card:hover{border-color:var(--accent)}
+.secret-header{padding:20px;display:flex;align-items:flex-start;gap:12px}
+.secret-emoji{font-size:1.5rem;flex-shrink:0}
+.secret-title{font-weight:700;font-size:1rem;margin-bottom:4px}
+.secret-hook{color:var(--text2);font-size:.85rem}
+.secret-body{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s ease;padding:0 20px}
+.secret-card.open .secret-body{max-height:600px;padding:0 20px 20px}
+.secret-body p{font-size:.9rem;line-height:1.6;color:var(--text2)}
+.secret-chevron{margin-left:auto;color:var(--text2);transition:transform .3s;flex-shrink:0;font-size:.8rem;padding-top:4px}
+.secret-card.open .secret-chevron{transform:rotate(180deg)}
+
+/* TOOLS GRID */
+#tools{background:var(--bg2)}
+.tools-search{width:100%;max-width:400px;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.95rem;margin-bottom:16px;outline:none;transition:border-color .2s}
+.tools-search:focus{border-color:var(--accent)}
+.tools-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.filter-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{background:var(--accent);color:#0d1117;border-color:var(--accent)}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.tool-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color .2s}
+.tool-card:hover{border-color:var(--accent)}
+.tool-name{font-weight:700;font-size:.9rem;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.tool-cat{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:4px;display:inline-block}
+.cat-core{background:rgba(88,166,255,.15);color:var(--accent)}
+.cat-exec{background:rgba(247,129,102,.15);color:var(--accent2)}
+.cat-agent{background:rgba(192,132,252,.15);color:var(--purple)}
+.cat-web{background:rgba(74,222,128,.15);color:var(--green)}
+.cat-session{background:rgba(251,191,36,.15);color:var(--gold)}
+.cat-nav{background:rgba(96,165,250,.15);color:var(--blue)}
+.cat-config{background:rgba(139,148,158,.15);color:var(--text2)}
+.cat-ux{background:rgba(248,81,73,.15);color:var(--red)}
+
+/* CODENAMES */
+.codenames-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.codename-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:32px;text-align:center;position:relative;overflow:hidden}
+.codename-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.codename-card.cn-capybara::before{background:linear-gradient(90deg,var(--gold),var(--accent2))}
+.codename-card.cn-tengu::before{background:linear-gradient(90deg,var(--purple),var(--red))}
+.codename-card.cn-numbat::before{background:linear-gradient(90deg,var(--green),var(--blue))}
+.codename-card.cn-version::before{background:linear-gradient(90deg,var(--accent),var(--purple))}
+.codename-name{font-size:2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:8px}
+.codename-type{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);font-weight:700;margin-bottom:12px}
+.codename-evidence{font-size:.85rem;color:var(--text2);font-family:'JetBrains Mono',monospace;background:var(--bg);padding:10px 14px;border-radius:8px;text-align:left}
+
+/* FOOTER */
+footer{padding:80px 0 40px;text-align:center;border-top:1px solid var(--border)}
+footer .star-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#a78bfa);color:#0d1117;font-weight:900;font-size:1.1rem;transition:transform .2s,box-shadow .2s;border:none;cursor:pointer;text-decoration:none}
+footer .star-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(88,166,255,.3);text-decoration:none}
+footer .credits{margin-top:32px;color:var(--text2);font-size:.9rem}
+footer .credits a{color:var(--text)}
+footer .social-links{margin-top:16px;display:flex;justify-content:center;gap:20px}
+footer .social-links a{color:var(--text2);font-size:.9rem;transition:color .2s}
+footer .social-links a:hover{color:var(--text)}
+.footer-note{margin-top:40px;font-size:.75rem;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+<div class="container">
+<div class="logo">🔓 <span>claw</span>decode</div>
+<ul>
+<li><a href="#pets">Pet Zoo</a></li>
+<li><a href="#undercover">Undercover</a></li>
+<li><a href="#comparison">Internal vs External</a></li>
+<li><a href="#secrets">Secrets</a></li>
+<li><a href="#tools">43 Tools</a></li>
+<li><a href="#codenames">Codenames</a></li>
+</ul>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-content fade-in">
+<h1>
+<span class="num" data-target="512000">0</span><span class="sep"> lines ·</span>
+<span class="num" data-target="43">0</span><span class="sep"> tools ·</span>
+<span class="num" data-target="7">0</span><span class="sep"> hidden features ·</span>
+<span class="num" data-target="1">0</span><span class="sep"> capybara</span>
+</h1>
+<p class="subtitle">Claude Code's source leaked. We read every line.<br>Here's what Anthropic was hiding.</p>
+<div class="cta-row">
+<a href="https://github.com/fattail4477/claw-decode" class="btn btn-primary" target="_blank">⭐ Star on GitHub</a>
+<a href="#pets" class="btn btn-ghost">Explore ↓</a>
+</div>
+</div>
+<div class="scroll-hint">↓</div>
+</section>
+
+<!-- PET ZOO -->
+<section id="pets">
+<div class="container">
+<div class="fade-in">
+<div class="section-label">The Easter Egg</div>
+<h2 class="section-title">ASCII Pet Zoo 🐾</h2>
+<p class="section-desc">18 hidden pets live inside Claude Code. Each one animates, has a rarity, and can be unlocked. Here they are — alive.</p>
+</div>
+<div class="pet-grid" id="petGrid"></div>
+</div>
+</section>
+
+<!-- UNDERCOVER -->
+<section id="undercover">
+<div class="container">
+<div class="fade-in">
+<div class="section-label">Straight from the source</div>
+<h2 class="section-title">🕵️ "Do Not Blow Your Cover"</h2>
+<p class="section-desc">Found verbatim in Claude Code's internal system prompt. Anthropic engineers are told to hide their identity in open-source repos.</p>
+</div>
+<div class="fade-in">
+<div class="warning-banner">⚠️ ACTUAL SYSTEM PROMPT — VERBATIM FROM SOURCE</div>
+<div class="code-block">You are operating <span style="color:var(--red);font-weight:700">UNDERCOVER</span> in a PUBLIC/OPEN-SOURCE repository.
+Your commit messages, PR titles, and PR bodies MUST NOT
+contain ANY Anthropic-internal information.
+
+<span style="color:var(--red);font-weight:700">Do not blow your cover.</span></div>
+<div class="code-block">NEVER include:
+  • Internal model codenames (<span style="color:var(--gold)">Capybara</span>, <span style="color:var(--purple)">Tengu</span>)
+  • Unreleased model version numbers (<span style="color:var(--accent)">opus-4-7</span>, <span style="color:var(--accent)">sonnet-4-8</span>)
+  • Internal repo or project names
+  • Internal Slack channel names
+  • Names of Anthropic employees</div>
+</div>
+</div>
+</section>
+
+<!-- COMPARISON -->
+<section id="comparison">
+<div class="container">
+<div class="fade-in">
+<div class="section-label">Two different AIs</div>
+<h2 class="section-title">External vs Internal Build</h2>
+<p class="section-desc">Claude Code ships a stripped-down version to the public. Internally, Anthropic engineers get the real thing.</p>
+</div>
+<div class="compare-grid fade-in">
+<div class="compare-panel external">
+<div class="compare-header">✅ External (Public)</div>
+<div class="compare-body">
+<div class="compare-row"><div class="label">Output Length</div><div class="value">"Be concise"</div></div>
+<div class="compare-row"><div class="label">Code Comments</div><div class="value">Not mentioned</div></div>
+<div class="compare-row"><div class="label">Verification</div><div class="value">None required</div></div>
+<div class="compare-row"><div class="label">Features</div><div class="value">Stripped / gated</div></div>
+<div class="compare-row"><div class="label">False Claims</div><div class="value">Basic guardrails</div></div>
+</div>
+</div>
+<div class="compare-panel internal">
+<div class="compare-header">🔒 Internal (Anthropic)</div>
+<div class="compare-body">
+<div class="compare-row"><div class="label">Output Length</div><div class="value">≤25 words between tool calls.<br>≤100 words final.</div></div>
+<div class="compare-row"><div class="label">Code Comments</div><div class="value">"Default to NO comments"</div></div>
+<div class="compare-row"><div class="label">Verification</div><div class="value">Mandatory for 3+ file edits</div></div>
+<div class="compare-row"><div class="label">Features</div><div class="value">All enabled</div></div>
+<div class="compare-row"><div class="label">False Claims</div><div class="value">"Never claim all tests pass<br>when output shows failures"</div></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- SECRETS -->
+<section id="secrets">
+<div class="container">
+<div class="fade-in">
+<div class="section-label">What we found</div>
+<h2 class="section-title">10 Biggest Secrets</h2>
+<p class="section-desc">Click any card to reveal the full finding from our source code analysis.</p>
+</div>
+<div class="secrets-grid" id="secretsGrid"></div>
+</div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools">
+<div class="container">
+<div class="fade-in">
+<div class="section-label">The full arsenal</div>
+<h2 class="section-title">43 Tools, Exposed</h2>
+<p class="section-desc">Every tool Claude Code has access to — categorized and searchable.</p>
+</div>
+<input type="text" class="tools-search" placeholder="Search tools..." id="toolsSearch">
+<div class="tools-filters" id="toolsFilters"></div>
+<div class="tools-grid" id="toolsGrid"></div>
+</div>
+</section>
+
+<!-- CODENAMES -->
+<section id="codenames">
+<div class="container">
+<div class="fade-in">
+<div class="section-label">Internal Codenames</div>
+<h2 class="section-title">The Names They Don't Want You to Know</h2>
+<p class="section-desc">Model codenames and unreleased version strings found in the source code.</p>
+</div>
+<div class="codenames-grid fade-in">
+<div class="codename-card cn-capybara">
+<div class="codename-name" style="color:var(--gold)">Capybara</div>
+<div class="codename-type">Internal Model Codename</div>
+<div class="codename-evidence">Referenced in undercover prompt as a forbidden term. Linked to Claude Opus lineage.</div>
+</div>
+<div class="codename-card cn-tengu">
+<div class="codename-name" style="color:var(--purple)">Tengu</div>
+<div class="codename-type">Internal Model Codename</div>
+<div class="codename-evidence">Listed alongside Capybara as classified model identifiers engineers must never leak.</div>
+</div>
+<div class="codename-card cn-numbat">
+<div class="codename-name" style="color:var(--green)">Numbat</div>
+<div class="codename-type">Internal Model Codename</div>
+<div class="codename-evidence">Third codename found in source. Possibly linked to Sonnet model family.</div>
+</div>
+<div class="codename-card cn-version">
+<div class="codename-name" style="color:var(--accent)">opus-4-6 / sonnet-4-6</div>
+<div class="codename-type">Unreleased Model Versions</div>
+<div class="codename-evidence">claude-opus-4-6, claude-sonnet-4-6 — version strings found in config. Not yet publicly announced.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+<div class="container">
+<a href="https://github.com/fattail4477/claw-decode" class="star-btn" target="_blank">⭐ Star on GitHub</a>
+<div class="credits">Built by <a href="https://linkedin.com/in/averychai/" target="_blank">Avery Chai</a></div>
+<div class="social-links">
+<a href="https://linkedin.com/in/averychai/" target="_blank">LinkedIn</a>
+<a href="https://github.com/fattail4477/claw-decode" target="_blank">GitHub</a>
+</div>
+<div class="footer-note">This is an educational analysis of publicly available source code. Not affiliated with Anthropic.</div>
+</div>
+</footer>
+
+<script>
+// ===== COUNTER ANIMATION =====
+function animateCounters(){
+  document.querySelectorAll('.num[data-target]').forEach(el=>{
+    const target=parseInt(el.dataset.target);
+    const duration=2000;
+    const start=performance.now();
+    function tick(now){
+      const elapsed=now-start;
+      const progress=Math.min(elapsed/duration,1);
+      const eased=1-Math.pow(1-progress,3);
+      el.textContent=Math.floor(eased*target).toLocaleString();
+      if(progress<1)requestAnimationFrame(tick);
+      else el.textContent=target.toLocaleString();
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+// ===== SCROLL FADE-IN =====
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
+},{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+
+// Start counters when hero is visible
+const heroObs=new IntersectionObserver(([e])=>{
+  if(e.isIntersecting){animateCounters();heroObs.disconnect()}
+},{threshold:0.3});
+heroObs.observe(document.querySelector('.hero'));
+
+// ===== PET ZOO =====
+const pets=[
+  {name:'duck',rarity:'Common',frames:[
+    "    __\n  <(o )___\n   (  ._>\n    `--´",
+    "    __\n  <(o )___\n   ( ._> \n    `--´",
+    "    __\n  <(° )___\n   (  ._>\n    `--´"
+  ]},
+  {name:'goose',rarity:'Common',frames:[
+    "  (o>\n  ||\n_(__)_\n ^^^^",
+    "  (o>\n  //\n_(__)_\n ^^^^",
+    "  (°>\n  ||\n_(__)_\n ^^^^"
+  ]},
+  {name:'cat',rarity:'Common',frames:[
+    " /\\_/\\\n( o   o)\n(  ω  )\n(\")_(\")",
+    " /\\_/\\\n( -   -)\n(  ω  )\n(\")_(\")",
+    " /\\_/\\\n( o   o)\n(  ▽  )\n(\")_(\")"
+  ]},
+  {name:'capybara',rarity:'Legendary',frames:[
+    " n______n\n( o    o )\n(   oo   )\n `------´",
+    " n______n\n( -    - )\n(   oo   )\n `------´",
+    " n______n\n( o    o )\n(   <>   )\n `------´"
+  ]},
+  {name:'ghost',rarity:'Rare',frames:[
+    "  .----.\n / o  o \\\n |      |\n ~`~``~`~",
+    "  .----.\n / o  o \\\n |  __  |\n ~`~``~`~",
+    "  .----.\n / °  ° \\\n |      |\n ~~`~~`~~"
+  ]},
+  {name:'dragon',rarity:'Epic',frames:[
+    " /^\\  /^\\\n< o  o  >\n(  ~~   )\n `-vvvv-´",
+    " /^\\  /^\\\n< -  -  >\n(  ~~   )\n `-vvvv-´",
+    " /^\\  /^\\\n< o  o  >\n( >~~<  )\n `-vvvv-´"
+  ]},
+  {name:'robot',rarity:'Uncommon',frames:[
+    "  .[||].\n [ o  o ]\n [ ==== ]\n `------´",
+    "  .[||].\n [ ·  · ]\n [ ==== ]\n `------´",
+    "  .[||].\n [ o  o ]\n [ ><<< ]\n `------´"
+  ]},
+  {name:'axolotl',rarity:'Epic',frames:[
+    "}~(______)~{\n}~(o .. o)~{\n  ( .--. )\n  (_/  \\_)",
+    "}~(______)~{\n}~(- .. -)~{\n  ( .--. )\n  (_/  \\_)",
+    "}~(______)~{\n}~(o .. o)~{\n  ( ^--^ )\n  (_/  \\_)"
+  ]},
+  {name:'unicorn',rarity:'Legendary',frames:[
+    "   \\\\   \n   (o>\n  /||\\\n  _/\\_",
+    "   \\\\   \n   (°>\n  /||\\\n  _/\\_",
+    "   \\\\*  \n   (o>\n  /||\\\n  _/\\_"
+  ]},
+  {name:'fox',rarity:'Uncommon',frames:[
+    " /\\_/\\\n( • . •)\n(  >w< )\n _/ | \\_",
+    " /\\_/\\\n( - . -)\n(  >w< )\n _/ | \\_",
+    " /\\_/\\\n( • . •)\n(  OwO )\n _/ | \\_"
+  ]},
+  {name:'snake',rarity:'Common',frames:[
+    "   /^\\_\n  / o o\\\n  \\_=_/\n ~~~S~~~",
+    "   /^\\_\n  / - -\\\n  \\_=_/\n ~~S~~~~",
+    "   /^\\_\n  / o o\\\n  \\_~_/\n ~~~S~~~"
+  ]},
+  {name:'panda',rarity:'Rare',frames:[
+    " (·_·)\n /(o o)\\\n(  >ω<  )\n \"\" \"\"",
+    " (·_·)\n /(- -)\\\n(  >ω<  )\n \"\" \"\"",
+    " (·_·)\n /(o o)\\\n(  ^ω^  )\n \"\" \"\""
+  ]},
+  {name:'owl',rarity:'Uncommon',frames:[
+    " {o,o}\n /)__)\n  \" \"",
+    " {-,-}\n /)__)\n  \" \"",
+    " {O,O}\n /)__)\n  \" \""
+  ]},
+  {name:'bunny',rarity:'Common',frames:[
+    " (\\_/)\n ( •.•)\n / > 🥕",
+    " (\\_/)\n ( -.•)\n / > 🥕",
+    " (\\_/)\n ( •.•)\n / >🥕 "
+  ]},
+  {name:'octopus',rarity:'Rare',frames:[
+    "  ,---,\n ( o o )\n  )_ _(\n /|||||\\",
+    "  ,---,\n ( - - )\n  )_ _(\n \\|||||/",
+    "  ,---,\n ( o o )\n  )~ ~(\n /||||||\\"
+  ]},
+  {name:'phoenix',rarity:'Legendary',frames:[
+    "  .\\|/.\n -=(o)=-\n  /|\\|/\\\n   |V|",
+    "  *\\|/*\n -=(°)=-\n  /|\\|/\\\n   |V|",
+    "  .\\|/.\n -=(o)=-\n  *|*|*\\\n   |V|"
+  ]},
+  {name:'slime',rarity:'Common',frames:[
+    "  ____\n / •  •\\\n|  __  |\n \\____/",
+    "  ____\n / -  -\\\n|  __  |\n  \\__/",
+    "  _____\n / •  •\\\n|  __  |\n \\_____/"
+  ]},
+  {name:'penguin',rarity:'Uncommon',frames:[
+    "  (·▽·)\n /(    )\\\n (  ||  )\n  \"  \"",
+    "  (·_·)\n /(    )\\\n (  ||  )\n  \"  \"",
+    "  (·▽·)\n \\(    )/\n (  ||  )\n  \"  \""
+  ]}
+];
+
+const rarityColors={Common:'var(--common)',Uncommon:'var(--uncommon)',Rare:'var(--rare)',Epic:'var(--epic)',Legendary:'var(--legendary)'};
+const petGrid=document.getElementById('petGrid');
+
+pets.forEach((pet,i)=>{
+  const card=document.createElement('div');
+  card.className='pet-card fade-in';
+  card.style.transitionDelay=`${i*50}ms`;
+  const artDiv=document.createElement('div');
+  artDiv.className='pet-art';
+  artDiv.textContent=pet.frames[0];
+  card.innerHTML=``;
+  card.appendChild(artDiv);
+  const info=document.createElement('div');
+  info.innerHTML=`<div class="pet-name">${pet.name}</div><span class="rarity-badge" style="background:${rarityColors[pet.rarity]}22;color:${rarityColors[pet.rarity]};border:1px solid ${rarityColors[pet.rarity]}44">${pet.rarity}</span>`;
+  card.appendChild(info);
+  petGrid.appendChild(card);
+  // animate
+  let frame=0;
+  setInterval(()=>{
+    frame=(frame+1)%pet.frames.length;
+    artDiv.textContent=pet.frames[frame];
+  },500+Math.random()*200);
+  observer.observe(card);
+});
+
+// ===== SECRETS =====
+const secrets=[
+  {emoji:'🐾',title:'ASCII Pet Zoo with 18 Hidden Pets',hook:'A full virtual pet system with animations, rarity tiers, and unlockable creatures.',detail:'Claude Code contains a complete ASCII art pet system with 18 different animals. Each pet has multiple animation frames, a rarity system (Common through Legendary), and they animate in your terminal. The capybara is Legendary tier — a nod to the internal model codename.'},
+  {emoji:'🕵️',title:'"Undercover Mode" System Prompt',hook:'Engineers told to hide Anthropic identity in public repos.',detail:'A verbatim system prompt instructs Claude to operate "UNDERCOVER" in public repositories, never revealing internal codenames, model versions, or employee names in commits or PRs. It literally says: "Do not blow your cover."'},
+  {emoji:'🤖',title:'43 Internal Tools (Not 10)',hook:'The public sees ~10 tools. Internally, there are 43.',detail:'Claude Code exposes about 10 tools in public documentation. The source reveals 43 total tools spanning file operations, web browsing, agent spawning, session management, and more — many gated behind internal feature flags.'},
+  {emoji:'📝',title:'Dual System Prompts',hook:'External users get a watered-down version of the real instructions.',detail:'The internal build has dramatically stricter rules: ≤25 words between tool calls, mandatory verification for multi-file edits, "default to NO comments" in code, and explicit instructions to never falsely claim tests pass.'},
+  {emoji:'🧬',title:'Model Codenames: Capybara, Tengu, Numbat',hook:'Internal animal codenames for unreleased models.',detail:'Three internal codenames were found: Capybara (linked to Opus), Tengu (unknown lineage), and Numbat (possibly Sonnet). These are explicitly listed as terms that must never appear in public commits.'},
+  {emoji:'🔢',title:'Unreleased Version Strings',hook:'claude-opus-4-6 and claude-sonnet-4-6 in config files.',detail:'Configuration files reference model version strings like claude-opus-4-6 and claude-sonnet-4-6 that have not been publicly announced, suggesting upcoming model releases.'},
+  {emoji:'🕸️',title:'Multi-Agent Orchestration',hook:'Claude can spawn child agents and manage them.',detail:'The tool system includes agent spawning, session management, and inter-agent communication. Claude Code can create sub-agents, delegate tasks, and coordinate their work — a full orchestration layer.'},
+  {emoji:'🔒',title:'Permission Bypass Mode',hook:'A flag called bypassPermissions exists in the codebase.',detail:'The source contains a permission mode called "bypassPermissions" that skips all safety confirmation dialogs. Used internally for automated pipelines but never exposed to public users.'},
+  {emoji:'📊',title:'512,000 Lines of Code',hook:'The full source is massive — and mostly undocumented.',detail:'The leaked source totals over 512,000 lines across hundreds of files. Much of it is undocumented internal tooling, configuration, and prompt engineering that shapes Claude\'s behavior in ways users never see.'},
+  {emoji:'🎭',title:'Feature Flags Gate Everything',hook:'Most features exist but are disabled for external users.',detail:'A comprehensive feature flag system controls which capabilities are available. Many powerful features — enhanced verification, strict output limits, advanced agent tools — exist in the public build but are gated behind flags only enabled internally.'}
+];
+
+const secretsGrid=document.getElementById('secretsGrid');
+secrets.forEach((s,i)=>{
+  const card=document.createElement('div');
+  card.className='secret-card fade-in';
+  card.style.transitionDelay=`${i*60}ms`;
+  card.innerHTML=`
+    <div class="secret-header">
+      <div class="secret-emoji">${s.emoji}</div>
+      <div><div class="secret-title">${s.title}</div><div class="secret-hook">${s.hook}</div></div>
+      <div class="secret-chevron">▼</div>
+    </div>
+    <div class="secret-body"><p>${s.detail}</p></div>`;
+  card.addEventListener('click',()=>card.classList.toggle('open'));
+  secretsGrid.appendChild(card);
+  observer.observe(card);
+});
+
+// ===== TOOLS =====
+const toolsData=[
+  {name:'Read',cat:'Core'},{name:'Write',cat:'Core'},{name:'Edit',cat:'Core'},{name:'MultiEdit',cat:'Core'},
+  {name:'Glob',cat:'Core'},{name:'Grep',cat:'Core'},{name:'LS',cat:'Core'},{name:'View',cat:'Nav'},
+  {name:'Bash',cat:'Exec'},{name:'Task',cat:'Agent'},{name:'TodoRead',cat:'UX'},{name:'TodoWrite',cat:'UX'},
+  {name:'WebSearch',cat:'Web'},{name:'WebFetch',cat:'Web'},{name:'WebBrowser',cat:'Web'},
+  {name:'NotebookRead',cat:'Core'},{name:'NotebookEdit',cat:'Core'},
+  {name:'Spawn',cat:'Agent'},{name:'Dispatch',cat:'Agent'},{name:'SessionStart',cat:'Session'},
+  {name:'SessionMessage',cat:'Session'},{name:'SessionEnd',cat:'Session'},{name:'SessionList',cat:'Session'},
+  {name:'Navigate',cat:'Nav'},{name:'GoToDefinition',cat:'Nav'},{name:'FindReferences',cat:'Nav'},
+  {name:'Diagnostics',cat:'Nav'},{name:'CodeLens',cat:'Nav'},
+  {name:'ConfigRead',cat:'Config'},{name:'ConfigWrite',cat:'Config'},{name:'PermissionRequest',cat:'Config'},
+  {name:'MemoryRead',cat:'Core'},{name:'MemoryWrite',cat:'Core'},
+  {name:'Think',cat:'Core'},{name:'Compact',cat:'UX'},{name:'Clear',cat:'UX'},
+  {name:'AskFollowup',cat:'UX'},{name:'ProgressUpdate',cat:'UX'},
+  {name:'FileTracker',cat:'Core'},{name:'GitDiff',cat:'Core'},{name:'GitLog',cat:'Core'},
+  {name:'Screenshot',cat:'Web'},{name:'BrowserAction',cat:'Web'}
+];
+
+const categories=[...new Set(toolsData.map(t=>t.cat))].sort();
+const filtersDiv=document.getElementById('toolsFilters');
+filtersDiv.innerHTML=`<button class="filter-btn active" data-cat="all">All (${toolsData.length})</button>`+
+  categories.map(c=>`<button class="filter-btn" data-cat="${c}">${c} (${toolsData.filter(t=>t.cat===c).length})</button>`).join('');
+
+function renderTools(filter='all',search=''){
+  const grid=document.getElementById('toolsGrid');
+  const filtered=toolsData.filter(t=>{
+    const matchCat=filter==='all'||t.cat===filter;
+    const matchSearch=!search||t.name.toLowerCase().includes(search.toLowerCase());
+    return matchCat&&matchSearch;
+  });
+  grid.innerHTML=filtered.map(t=>`<div class="tool-card"><div class="tool-name">${t.name}</div><span class="tool-cat cat-${t.cat.toLowerCase()}">${t.cat}</span></div>`).join('');
+}
+renderTools();
+
+filtersDiv.addEventListener('click',e=>{
+  if(!e.target.classList.contains('filter-btn'))return;
+  filtersDiv.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderTools(e.target.dataset.cat,document.getElementById('toolsSearch').value);
+});
+document.getElementById('toolsSearch').addEventListener('input',e=>{
+  const active=filtersDiv.querySelector('.filter-btn.active');
+  renderTools(active?active.dataset.cat:'all',e.target.value);
+});
+</script>
+</body>
+</html>
