@@ -11,7 +11,7 @@
 
 ## Source Code Location
 
-The leaked source code is at: `~/Desktop/claude-code-leaked/hangsman/src/`
+The leaked source code is at: `~/Desktop/claw-decode-sources/hangsman/src/`
 - 1,884 TypeScript files
 - Key files:
   - `src/constants/prompts.ts` — Main system prompt (914 lines)
