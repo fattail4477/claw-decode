@@ -7,12 +7,13 @@
 <meta name="description" content="The complete analysis of Claude Code's leaked source: 43 tools, 7 hidden features, ASCII pets, undercover mode, and everything Anthropic didn't want you to see.">
 <meta property="og:title" content="Claw Decode — Inside Claude Code's 512K Line Source Leak">
 <meta property="og:description" content="512,000 lines. 43 tools. 7 hidden features. 1 capybara. Everything Anthropic didn't want you to see.">
-<meta property="og:url" content="https://clawdecode.net/">
+<meta property="og:url" content="https://clawdecode.net">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://raw.githubusercontent.com/fattail4477/claw-decode/main/assets/logo.jpg">
+<link rel="canonical" href="https://clawdecode.net">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Claw Decode — Inside Claude Code's 512K Line Source Leak">
-<meta name="twitter:description" content="512,000 lines. 43 tools. 7 hidden features. 1 capybara. Everything Anthropic didn't want you to see.">
+<meta name="twitter:title" content="Claw Decode — Inside Claude Code's Leaked Source">
+<meta name="twitter:description" content="512,000 lines. 43 tools. 7 hidden features. Everything Anthropic was hiding.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -605,19 +606,98 @@ detection evasion for malicious purposes.</div>
 </div>
 </section>
 
-<!-- FOOTER -->
-<footer>
-<div class="container">
-  <a href="https://github.com/fattail4477/claw-decode" class="foot-btn" target="_blank">
-    <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-    Star on GitHub
-  </a>
-  <div class="foot-meta" style="margin-top:20px">
-    Analysis by <a href="https://linkedin.com/in/averychai/" target="_blank">Avery Chai</a> &middot; <a href="https://x.com/chatoliciuh" target="_blank">@chatoliciuh</a>
-    <br><br>
-    This repo does not contain Anthropic's source code. Analysis &amp; commentary under Fair Use.
+<!-- TIMELINE SECTION -->
+<section class="reveal" style="max-width:900px;margin:0 auto;padding:80px 20px">
+  <h2 style="text-align:center;font-size:2rem;margin-bottom:40px">📅 How It Happened</h2>
+  
+  <div style="position:relative;padding-left:40px;border-left:2px solid #30363d">
+    <div style="margin-bottom:30px;position:relative">
+      <div style="position:absolute;left:-49px;width:16px;height:16px;border-radius:50%;background:#dc2626;border:2px solid #0d1117"></div>
+      <div style="color:#dc2626;font-weight:bold;font-size:.85rem">00:21 UTC — Discovery</div>
+      <div style="color:#c9d1d9;margin-top:4px">Security researcher <strong>Chaofan Shou</strong> (@Fried_rice) discovers a 60MB source map file in Claude Code's npm package pointing to Anthropic's R2 storage bucket.</div>
+      <div style="color:#8b949e;margin-top:4px;font-style:italic">"Claude code source code has been leaked via a map file in their npm registry!" — 3.1 million views</div>
+    </div>
+    
+    <div style="margin-bottom:30px;position:relative">
+      <div style="position:absolute;left:-49px;width:16px;height:16px;border-radius:50%;background:#f97316;border:2px solid #0d1117"></div>
+      <div style="color:#f97316;font-weight:bold;font-size:.85rem">00:30 - 02:00 UTC — Mirrors Appear</div>
+      <div style="color:#c9d1d9;margin-top:4px">Code archived on multiple GitHub repos. Top mirror hits <strong>22,000+ stars</strong> in hours.</div>
+    </div>
+    
+    <div style="margin-bottom:30px;position:relative">
+      <div style="position:absolute;left:-49px;width:16px;height:16px;border-radius:50%;background:#eab308;border:2px solid #0d1117"></div>
+      <div style="color:#eab308;font-weight:bold;font-size:.85rem">04:00 UTC — Rewrites Begin</div>
+      <div style="color:#c9d1d9;margin-top:4px">Sigrid Jin (@instructkr) starts a clean-room Python rewrite. Later featured in Wall Street Journal.</div>
+    </div>
+    
+    <div style="margin-bottom:30px;position:relative">
+      <div style="position:absolute;left:-49px;width:16px;height:16px;border-radius:50%;background:#3b82f6;border:2px solid #0d1117"></div>
+      <div style="color:#3b82f6;font-weight:bold;font-size:.85rem">06:00 - 12:00 UTC — Media Explosion</div>
+      <div style="color:#c9d1d9;margin-top:4px">VentureBeat, The Register, CyberNews, NDTV, Decrypt, Economic Times — global coverage.</div>
+    </div>
+    
+    <div style="margin-bottom:30px;position:relative">
+      <div style="position:absolute;left:-49px;width:16px;height:16px;border-radius:50%;background:#a855f7;border:2px solid #0d1117"></div>
+      <div style="color:#a855f7;font-weight:bold;font-size:.85rem">12:00+ UTC — DMCA Attempts</div>
+      <div style="color:#c9d1d9;margin-top:4px">Anthropic issues takedowns. Several mirrors removed, but code already forked hundreds of times. <strong>"Effectively permanent and uncontrollable."</strong></div>
+    </div>
+    
+    <div style="position:relative">
+      <div style="position:absolute;left:-49px;width:16px;height:16px;border-radius:50%;background:#6b7280;border:2px solid #0d1117"></div>
+      <div style="color:#6b7280;font-weight:bold;font-size:.85rem">⚠️ This is the SECOND time</div>
+      <div style="color:#c9d1d9;margin-top:4px">A similar incident occurred in early 2025 with an earlier version.</div>
+    </div>
   </div>
-</div>
+</section>
+
+<!-- GITHUB REPOS SECTION -->
+<section class="reveal" style="max-width:900px;margin:0 auto;padding:40px 20px 80px">
+  <h2 style="text-align:center;font-size:2rem;margin-bottom:40px">📦 All Related Repositories</h2>
+  
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+    <a href="https://github.com/Kuberwastaken/claude-code" target="_blank" style="display:block;padding:16px;background:#161b22;border:1px solid #30363d;border-radius:12px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="color:#58a6ff;font-weight:bold">Kuberwastaken/claude-code</div>
+      <div style="color:#8b949e;font-size:.85rem;margin-top:4px">Complete TS source + detailed analysis</div>
+    </a>
+    <a href="https://github.com/mehmoodosman/claude-code-source-code" target="_blank" style="display:block;padding:16px;background:#161b22;border:1px solid #30363d;border-radius:12px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="color:#58a6ff;font-weight:bold">mehmoodosman/claude-code-source-code</div>
+      <div style="color:#8b949e;font-size:.85rem;margin-top:4px">Early mirror of full source</div>
+    </a>
+    <a href="https://github.com/instructkr/claw-code" target="_blank" style="display:block;padding:16px;background:#161b22;border:1px solid #30363d;border-radius:12px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#4ade80'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="color:#4ade80;font-weight:bold">instructkr/claw-code</div>
+      <div style="color:#8b949e;font-size:.85rem;margin-top:4px">🐍 Clean-room Python rewrite</div>
+    </a>
+    <a href="https://github.com/shipany-ai/open-agent-sdk" target="_blank" style="display:block;padding:16px;background:#161b22;border:1px solid #30363d;border-radius:12px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#4ade80'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="color:#4ade80;font-weight:bold">shipany-ai/open-agent-sdk</div>
+      <div style="color:#8b949e;font-size:.85rem;margin-top:4px">📦 Open Agent SDK for any LLM</div>
+    </a>
+    <a href="https://github.com/Piebald-AI/tweakcc" target="_blank" style="display:block;padding:16px;background:#161b22;border:1px solid #30363d;border-radius:12px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#fbbf24'" onmouseout="this.style.borderColor='#30363d'">
+      <div style="color:#fbbf24;font-weight:bold">Piebald-AI/tweakcc</div>
+      <div style="color:#8b949e;font-size:.85rem;margin-top:4px">🔧 Customize Claude Code's prompts</div>
+    </a>
+    <a href="https://github.com/fattail4477/claw-decode" target="_blank" style="display:block;padding:16px;background:#161b22;border:1px solid #fbbf24;border-radius:12px;text-decoration:none">
+      <div style="color:#fbbf24;font-weight:bold">⭐ fattail4477/claw-decode</div>
+      <div style="color:#8b949e;font-size:.85rem;margin-top:4px">This project — analysis, website, tools</div>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="text-align:center;padding:60px 20px;border-top:1px solid #30363d;background:#0b0e13">
+  <div style="margin-bottom:24px">
+    <a href="https://github.com/fattail4477/claw-decode" target="_blank" style="display:inline-block;padding:14px 32px;background:#fbbf24;color:#000;text-decoration:none;border-radius:8px;font-weight:bold;font-size:1.1rem;margin:8px">⭐ Star on GitHub</a>
+  </div>
+  <div style="margin-bottom:24px">
+    <a href="https://x.com/chatoliciuh" target="_blank" style="color:#58a6ff;text-decoration:none;margin:0 12px;font-size:1rem">🐦 Twitter/X</a>
+    <a href="https://linkedin.com/in/averychai/" target="_blank" style="color:#58a6ff;text-decoration:none;margin:0 12px;font-size:1rem">💼 LinkedIn</a>
+    <a href="https://github.com/fattail4477/claw-decode" target="_blank" style="color:#58a6ff;text-decoration:none;margin:0 12px;font-size:1rem">📦 GitHub</a>
+  </div>
+  <div style="color:#8b949e;font-size:.9rem">
+    By <a href="https://linkedin.com/in/averychai/" target="_blank" style="color:#c9d1d9;text-decoration:none;font-weight:bold">Avery Chai</a> — Building in the AI agent space
+  </div>
+  <div style="color:#484f58;font-size:.75rem;margin-top:12px">
+    Analysis only. No source code. Fair use.
+  </div>
 </footer>
 
 <script>

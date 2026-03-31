@@ -1,21 +1,3 @@
 {
-  "pages": {
-    "/page": [
-      "static/chunks/Desktop_claw-decode_site_src_app_globals_2eb65166.css",
-      "static/chunks/4e014_next_dist_a600b764._.js",
-      "static/chunks/Desktop_claw-decode_site_src_app_layout_tsx_67280281._.js",
-      "static/chunks/4e014_next_dist_client_components_builtin_global-error_e386f191.js",
-      "static/chunks/Desktop_claw-decode_site_c56b7538._.js",
-      "static/chunks/Desktop_claw-decode_site_src_app_page_tsx_e386f191._.js",
-      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_9da2e62c._.js",
-      "static/chunks/4e014_next_dist_compiled_react-dom_bf0a2719._.js",
-      "static/chunks/4e014_next_dist_compiled_next-devtools_index_0e8ea809.js",
-      "static/chunks/4e014_next_dist_compiled_ba522889._.js",
-      "static/chunks/4e014_next_dist_client_5bd5eded._.js",
-      "static/chunks/4e014_next_dist_00ec4961._.js",
-      "static/chunks/6b19c_@swc_helpers_cjs_c2abd55f._.js",
-      "static/chunks/Desktop_claw-decode_site_a0ff3932._.js",
-      "static/chunks/turbopack-Desktop_claw-decode_site_a35444d6._.js"
-    ]
-  }
+  "pages": {}
 }
