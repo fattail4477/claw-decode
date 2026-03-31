@@ -3,155 +3,206 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claw Decode — Inside Claude Code's Leaked Source</title>
-<meta property="og:title" content="Claw Decode — Inside Claude Code's Leaked Source">
-<meta property="og:description" content="512,000 lines. 43 tools. 7 hidden features. Everything Anthropic was hiding.">
-<meta property="og:url" content="https://fattail4477.github.io/claw-decode/">
+<title>Claw Decode — Inside Claude Code's 512K Line Source Leak</title>
+<meta name="description" content="The complete analysis of Claude Code's leaked source: 43 tools, 7 hidden features, ASCII pets, undercover mode, and everything Anthropic didn't want you to see.">
+<meta property="og:title" content="Claw Decode — Inside Claude Code's 512K Line Source Leak">
+<meta property="og:description" content="512,000 lines. 43 tools. 7 hidden features. 1 capybara. Everything Anthropic didn't want you to see.">
+<meta property="og:url" content="https://clawdecode.net/">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://fattail4477.github.io/claw-decode/og-image.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/fattail4477/claw-decode/main/assets/logo.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Claw Decode — Inside Claude Code's Leaked Source">
-<meta name="twitter:description" content="512,000 lines. 43 tools. 7 hidden features. Everything Anthropic was hiding.">
-<meta name="description" content="Claude Code's source leaked. We read every line. Here's what Anthropic was hiding inside 512,000 lines of code.">
+<meta name="twitter:title" content="Claw Decode — Inside Claude Code's 512K Line Source Leak">
+<meta name="twitter:description" content="512,000 lines. 43 tools. 7 hidden features. 1 capybara. Everything Anthropic didn't want you to see.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--border:#30363d;
-  --text:#e6edf3;--text2:#8b949e;--accent:#58a6ff;--accent2:#f78166;
-  --green:#4ade80;--blue:#60a5fa;--purple:#c084fc;--gold:#fbbf24;
-  --red:#f85149;--common:#888;--uncommon:#4ade80;--rare:#60a5fa;
-  --epic:#c084fc;--legendary:#fbbf24;
+  --bg:#0a0a0a;--bg2:#111;--bg3:#161616;--bg4:#1c1c1c;
+  --border:#252525;--border2:#333;
+  --green:#00ff88;--green2:#00cc6a;--green-bg:rgba(0,255,136,.08);--green-glow:rgba(0,255,136,.15);
+  --cyan:#00d4ff;--cyan-bg:rgba(0,212,255,.08);
+  --purple:#a855f7;--purple-bg:rgba(168,85,247,.08);
+  --red:#ff4444;--red-bg:rgba(255,68,68,.08);
+  --orange:#ff8800;--yellow:#ffd700;--yellow-bg:rgba(255,215,0,.08);
+  --text:#e0e0e0;--text2:#888;--text3:#555;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
 }
-html{scroll-behavior:smooth;scroll-padding-top:20px}
-body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-.container{max-width:1200px;margin:0 auto;padding:0 24px}
-.fade-in{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
-.fade-in.visible{opacity:1;transform:translateY(0)}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{font-family:var(--sans);color:var(--text);background:var(--bg);line-height:1.6;overflow-x:hidden}
+a{color:var(--green);text-decoration:none;transition:color .2s}
+a:hover{color:var(--cyan)}
+::selection{background:var(--green);color:var(--bg)}
+.container{max-width:1100px;margin:0 auto;padding:0 20px}
+.reveal{opacity:0;transform:translateY(24px);transition:all .6s ease}
+.reveal.visible{opacity:1;transform:none}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,17,23,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 0}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:10px 0}
 nav .container{display:flex;align-items:center;justify-content:space-between}
-nav .logo{font-weight:900;font-size:1.1rem;letter-spacing:-.02em}
-nav .logo span{color:var(--accent)}
-nav ul{list-style:none;display:flex;gap:24px}
-nav ul a{color:var(--text2);font-size:.85rem;font-weight:600;transition:color .2s}
-nav ul a:hover{color:var(--text);text-decoration:none}
-@media(max-width:768px){nav ul{display:none}}
+.nav-logo{font-family:var(--mono);font-weight:700;font-size:.95rem;color:var(--text);letter-spacing:-.02em}
+.nav-logo span{color:var(--green)}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{color:var(--text2);font-size:.8rem;font-weight:600;transition:color .2s}
+.nav-links a:hover{color:var(--green)}
+@media(max-width:768px){.nav-links{display:none}}
 
 /* HERO */
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at center,rgba(88,166,255,.06) 0%,transparent 60%);animation:pulse 8s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
-.hero-content{position:relative;z-index:1}
-.hero h1{font-size:clamp(2.2rem,5vw,4rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:24px}
-.hero h1 .num{color:var(--accent);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
-.hero h1 .sep{color:var(--text2);margin:0 .15em;font-weight:400}
-.hero .subtitle{font-size:clamp(1rem,2vw,1.35rem);color:var(--text2);max-width:700px;margin:0 auto 40px;line-height:1.5}
-.hero .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:8px;font-weight:700;font-size:.95rem;border:none;cursor:pointer;transition:all .2s}
-.btn-primary{background:var(--accent);color:#0d1117}.btn-primary:hover{background:#79c0ff;text-decoration:none}
-.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--text2);text-decoration:none}
-.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);animation:bob 2s ease-in-out infinite;color:var(--text2);font-size:1.5rem}
-@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(10px)}}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 20px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,var(--green-glow),transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border:1px solid rgba(0,255,136,.2);border-radius:100px;font-family:var(--mono);font-size:.7rem;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-bottom:28px;background:rgba(0,255,136,.04)}
+.hero-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+.hero h1{font-family:var(--mono);font-size:clamp(2.2rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:20px}
+.hero h1 .g{color:var(--green);text-shadow:0 0 40px var(--green-glow)}
+.hero-stats{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+.hero-stat .num{font-family:var(--mono);font-size:clamp(1.6rem,4vw,2.5rem);font-weight:700;color:var(--green);display:block;line-height:1}
+.hero-stat .lbl{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.hero-sub{font-size:1.05rem;color:var(--text2);max-width:580px;margin:0 auto 28px;line-height:1.5}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;font-family:var(--mono);font-weight:700;font-size:.88rem;border-radius:8px;border:none;cursor:pointer;transition:all .25s;text-decoration:none}
+.btn-g{background:var(--green);color:var(--bg)}.btn-g:hover{background:#fff;color:var(--bg);transform:translateY(-2px);box-shadow:0 8px 25px var(--green-glow)}
+.btn-o{background:transparent;color:var(--text);border:1px solid var(--border2)}.btn-o:hover{border-color:var(--green);color:var(--green)}
+.scroll-down{position:absolute;bottom:28px;color:var(--text3);font-family:var(--mono);font-size:.75rem;animation:bob 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
 /* SECTIONS */
-section{padding:100px 0}
-.section-label{text-transform:uppercase;font-size:.75rem;font-weight:700;letter-spacing:.15em;color:var(--accent);margin-bottom:8px}
-.section-title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;letter-spacing:-.02em;margin-bottom:16px}
-.section-desc{color:var(--text2);font-size:1.05rem;max-width:650px;margin-bottom:48px}
+section{padding:80px 0;position:relative}
+section.alt{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.stag{font-family:var(--mono);font-size:.7rem;color:var(--green);text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px}
+.stitle{font-family:var(--mono);font-size:clamp(1.6rem,3.5vw,2.3rem);font-weight:700;margin-bottom:10px;line-height:1.2}
+.sdesc{color:var(--text2);font-size:.95rem;max-width:600px;margin-bottom:36px}
 
-/* PET ZOO */
-#pets{background:var(--bg2)}
-.pet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-.pet-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:transform .2s,border-color .3s}
-.pet-card:hover{transform:translateY(-4px);border-color:var(--accent)}
-.pet-art{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.35;white-space:pre;min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--text);margin-bottom:12px}
-.pet-name{font-weight:700;font-size:1rem;margin-bottom:6px;text-transform:capitalize}
-.rarity-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+/* PET GRID */
+.pet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.pet-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;transition:all .3s;cursor:default}
+.pet-card:hover{border-color:var(--green);transform:translateY(-3px);box-shadow:0 6px 20px var(--green-glow)}
+.pet-card .art{font-family:var(--mono);font-size:12px;line-height:1.3;white-space:pre;color:var(--green);min-height:60px;display:flex;align-items:center;justify-content:center}
+.pet-card .pname{font-family:var(--mono);font-weight:600;font-size:.8rem;margin-top:8px;text-transform:capitalize}
+.pet-card .prarity{font-size:.65rem;color:var(--text2);margin-top:2px}
+.pet-card .pstars{font-size:.65rem;margin-top:2px;letter-spacing:2px}
+.pet-card.legendary{border-color:rgba(255,215,0,.25);background:linear-gradient(135deg,var(--bg3),var(--yellow-bg))}
+.pet-card.legendary .art{color:var(--yellow)}
+.pet-card.epic{border-color:rgba(168,85,247,.25);background:linear-gradient(135deg,var(--bg3),var(--purple-bg))}
+.pet-card.epic .art{color:var(--purple)}
+.pet-card.rare{border-color:rgba(0,212,255,.2)}
+.pet-card.rare .art{color:var(--cyan)}
+.pet-card.uncommon .art{color:#4ade80}
+.hat-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;justify-content:center}
+.hat-tag{font-family:var(--mono);font-size:.7rem;padding:4px 10px;border-radius:5px;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+.pet-stats-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center}
+.pet-stat-tag{font-family:var(--mono);font-size:.65rem;padding:3px 8px;border-radius:4px;background:var(--green-bg);color:var(--green);border:1px solid rgba(0,255,136,.15)}
+.eye-row{display:flex;gap:10px;margin-top:12px;justify-content:center}
+.eye-tag{font-size:1.1rem;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px}
 
 /* UNDERCOVER */
-#undercover{background:linear-gradient(135deg,rgba(248,81,73,.08),rgba(248,81,73,.02));border-top:2px solid var(--red);border-bottom:2px solid var(--red)}
-#undercover .warning-banner{display:flex;align-items:center;gap:12px;background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.3);border-radius:12px;padding:20px 24px;margin-bottom:32px;font-size:1.1rem;font-weight:700;color:var(--red)}
-#undercover .code-block{background:#0d1117;border:1px solid var(--border);border-radius:12px;padding:24px;font-family:'JetBrains Mono',monospace;font-size:.85rem;line-height:1.7;color:var(--text);overflow-x:auto;margin-bottom:24px;position:relative}
-#undercover .code-block::before{content:'SYSTEM PROMPT';position:absolute;top:8px;right:12px;font-size:.6rem;color:var(--text2);letter-spacing:.1em;font-weight:700}
-.never-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:16px}
-.never-item{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.2);border-radius:8px;padding:12px 16px;font-size:.9rem;color:var(--red)}
-.never-item strong{color:#ff7b72}
-
-/* COMPARISON */
-#comparison .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-@media(max-width:768px){#comparison .compare-grid{grid-template-columns:1fr}}
-.compare-panel{border-radius:12px;overflow:hidden;border:1px solid var(--border)}
-.compare-panel.external .compare-header{background:rgba(74,222,128,.12);color:var(--green);border-bottom:2px solid var(--green)}
-.compare-panel.internal .compare-header{background:rgba(247,129,102,.12);color:var(--accent2);border-bottom:2px solid var(--accent2)}
-.compare-header{padding:16px 20px;font-weight:700;font-size:1.05rem}
-.compare-body{background:var(--bg2);padding:0}
-.compare-row{padding:14px 20px;border-bottom:1px solid var(--border);font-size:.9rem}
-.compare-row:last-child{border:none}
-.compare-row .label{color:var(--text2);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
-.compare-row .value{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.85rem}
+.uc-block{background:var(--bg3);border:1px solid rgba(255,68,68,.25);border-radius:14px;padding:28px;position:relative;overflow:hidden}
+.uc-block::before{content:'CLASSIFIED';position:absolute;top:12px;right:16px;font-family:var(--mono);font-size:.6rem;color:rgba(255,68,68,.35);letter-spacing:.2em}
+.uc-title{font-family:var(--mono);font-size:clamp(1.1rem,2.5vw,1.4rem);color:var(--red);font-weight:700;margin-bottom:16px}
+.uc-text{font-family:var(--mono);font-size:.78rem;line-height:1.8;color:var(--text2);white-space:pre-wrap}
+.uc-text .r{color:var(--red);font-weight:600}
+.uc-text .g{color:var(--green)}
+.uc-text .b{color:var(--red)}
+.uc-src{margin-top:14px;font-family:var(--mono);font-size:.65rem;color:var(--text3)}
 
 /* SECRETS */
-.secrets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
-.secret-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s}
-.secret-card:hover{border-color:var(--accent)}
-.secret-header{padding:20px;display:flex;align-items:flex-start;gap:12px}
-.secret-emoji{font-size:1.5rem;flex-shrink:0}
-.secret-title{font-weight:700;font-size:1rem;margin-bottom:4px}
-.secret-hook{color:var(--text2);font-size:.85rem}
-.secret-body{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s ease;padding:0 20px}
-.secret-card.open .secret-body{max-height:600px;padding:0 20px 20px}
-.secret-body p{font-size:.9rem;line-height:1.6;color:var(--text2)}
-.secret-chevron{margin-left:auto;color:var(--text2);transition:transform .3s;flex-shrink:0;font-size:.8rem;padding-top:4px}
-.secret-card.open .secret-chevron{transform:rotate(180deg)}
+.secrets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.sc{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:18px;transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.sc:hover{border-color:rgba(0,255,136,.2);transform:translateY(-2px)}
+.sc .sn{font-family:var(--mono);font-size:.65rem;color:var(--green);opacity:.5;position:absolute;top:12px;right:14px}
+.sc h3{font-family:var(--mono);font-size:.92rem;font-weight:600;margin-bottom:5px;padding-right:28px}
+.sc p{font-size:.82rem;color:var(--text2);line-height:1.5}
+.sc .stg{display:inline-block;font-family:var(--mono);font-size:.6rem;padding:2px 6px;background:var(--green-bg);color:var(--green);border-radius:3px;margin-top:8px}
+.sc-detail{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.sc.open .sc-detail{max-height:300px}
+.sc-detail p{margin-top:10px;font-size:.82rem;color:var(--text2);line-height:1.6;border-top:1px solid var(--border);padding-top:10px}
 
-/* TOOLS GRID */
-#tools{background:var(--bg2)}
-.tools-search{width:100%;max-width:400px;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.95rem;margin-bottom:16px;outline:none;transition:border-color .2s}
-.tools-search:focus{border-color:var(--accent)}
-.tools-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
-.filter-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
-.filter-btn.active,.filter-btn:hover{background:var(--accent);color:#0d1117;border-color:var(--accent)}
-.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-.tool-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color .2s}
-.tool-card:hover{border-color:var(--accent)}
-.tool-name{font-weight:700;font-size:.9rem;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
-.tool-cat{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:4px;display:inline-block}
-.cat-core{background:rgba(88,166,255,.15);color:var(--accent)}
-.cat-exec{background:rgba(247,129,102,.15);color:var(--accent2)}
-.cat-agent{background:rgba(192,132,252,.15);color:var(--purple)}
-.cat-web{background:rgba(74,222,128,.15);color:var(--green)}
-.cat-session{background:rgba(251,191,36,.15);color:var(--gold)}
-.cat-nav{background:rgba(96,165,250,.15);color:var(--blue)}
-.cat-config{background:rgba(139,148,158,.15);color:var(--text2)}
-.cat-ux{background:rgba(248,81,73,.15);color:var(--red)}
+/* COMPARE */
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.cmp-grid{grid-template-columns:1fr}}
+.cmp-panel{border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.cmp-panel.ext .cmp-h{background:rgba(0,255,136,.08);color:var(--green);border-bottom:2px solid var(--green)}
+.cmp-panel.int .cmp-h{background:rgba(255,136,0,.08);color:var(--orange);border-bottom:2px solid var(--orange)}
+.cmp-h{padding:14px 18px;font-family:var(--mono);font-weight:700;font-size:.9rem}
+.cmp-row{padding:12px 18px;border-bottom:1px solid var(--border);font-size:.82rem}
+.cmp-row:last-child{border:none}
+.cmp-row .cl{color:var(--text2);font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.cmp-row .cv{font-family:var(--mono);font-size:.8rem}
+
+/* DREAM */
+.dream-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.dream-card{background:var(--bg3);border:1px solid rgba(0,212,255,.12);border-radius:10px;padding:18px}
+.dream-card .dnum{font-family:var(--mono);font-size:.6rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.15em;margin-bottom:6px}
+.dream-card h3{font-family:var(--mono);font-size:.9rem;font-weight:600;margin-bottom:6px}
+.dream-card p{font-size:.78rem;color:var(--text2);line-height:1.5}
+
+/* PROMPT BLOCK */
+.pblock{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;font-family:var(--mono);font-size:.75rem;line-height:1.7;color:var(--text2);overflow-x:auto;white-space:pre-wrap;position:relative}
+.pblock .plbl{position:absolute;top:8px;right:12px;font-size:.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:.15em}
+
+/* TOOLS */
+.tools-search{width:100%;max-width:380px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:.82rem;outline:none;transition:border-color .2s;margin-bottom:10px}
+.tools-search:focus{border-color:var(--green)}
+.tools-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.fbtn{padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--mono);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s}
+.fbtn.active,.fbtn:hover{background:var(--green);color:var(--bg);border-color:var(--green)}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.tc{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:border-color .2s}
+.tc:hover{border-color:var(--green)}
+.tc .tn{font-family:var(--mono);font-weight:600;font-size:.82rem;margin-bottom:3px}
+.tc .td{font-size:.7rem;color:var(--text2);margin-bottom:4px}
+.tc .tcat{font-family:var(--mono);font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:3px;display:inline-block}
+.cat-core{background:rgba(0,212,255,.1);color:var(--cyan)}
+.cat-exec{background:rgba(255,136,0,.1);color:var(--orange)}
+.cat-agent{background:rgba(168,85,247,.1);color:var(--purple)}
+.cat-task{background:rgba(0,255,136,.1);color:var(--green)}
+.cat-web{background:rgba(74,222,128,.1);color:#4ade80}
+.cat-mcp{background:rgba(255,215,0,.1);color:var(--yellow)}
+.cat-ide{background:rgba(96,165,250,.1);color:#60a5fa}
+.cat-session{background:rgba(248,81,73,.1);color:var(--red)}
+.cat-nav{background:rgba(139,148,158,.1);color:var(--text2)}
+.cat-config{background:rgba(139,148,158,.1);color:var(--text2)}
+.cat-ux{background:rgba(255,136,0,.1);color:var(--orange)}
+.tc.internal{border-style:dashed;opacity:.7}
+.tc.internal .tn::after{content:' (internal)';font-size:.6rem;color:var(--purple);font-weight:400}
+
+/* PATTERNS */
+.pattern-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.pat{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .3s}
+.pat:hover{border-color:rgba(0,255,136,.2)}
+.pat h3{font-family:var(--mono);font-size:.9rem;font-weight:600;margin-bottom:6px;color:var(--green)}
+.pat .pwhy{font-size:.82rem;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.pat .pkey{font-family:var(--mono);font-size:.72rem;color:var(--cyan);padding:8px 12px;background:var(--bg);border-radius:6px;line-height:1.5}
 
 /* CODENAMES */
-.codenames-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
-.codename-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:32px;text-align:center;position:relative;overflow:hidden}
-.codename-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.codename-card.cn-capybara::before{background:linear-gradient(90deg,var(--gold),var(--accent2))}
-.codename-card.cn-tengu::before{background:linear-gradient(90deg,var(--purple),var(--red))}
-.codename-card.cn-numbat::before{background:linear-gradient(90deg,var(--green),var(--blue))}
-.codename-card.cn-version::before{background:linear-gradient(90deg,var(--accent),var(--purple))}
-.codename-name{font-size:2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:8px}
-.codename-type{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);font-weight:700;margin-bottom:12px}
-.codename-evidence{font-size:.85rem;color:var(--text2);font-family:'JetBrains Mono',monospace;background:var(--bg);padding:10px 14px;border-radius:8px;text-align:left}
+.cn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.cn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;text-align:center;position:relative;overflow:hidden}
+.cn::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.cn.cn-cap::before{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+.cn.cn-ten::before{background:linear-gradient(90deg,var(--purple),var(--red))}
+.cn.cn-num::before{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.cn .cnn{font-family:var(--mono);font-size:1.6rem;font-weight:700;margin-bottom:4px}
+.cn .cnt{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:8px}
+.cn .cne{font-size:.78rem;color:var(--text2);text-align:left;background:var(--bg);padding:10px;border-radius:6px;font-family:var(--mono);font-size:.72rem;line-height:1.4}
+
+/* MEMORY */
+.mem-struct{font-family:var(--mono);font-size:.8rem;line-height:1.6;color:var(--green);padding:16px 20px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;white-space:pre}
 
 /* FOOTER */
-footer{padding:80px 0 40px;text-align:center;border-top:1px solid var(--border)}
-footer .star-btn{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#a78bfa);color:#0d1117;font-weight:900;font-size:1.1rem;transition:transform .2s,box-shadow .2s;border:none;cursor:pointer;text-decoration:none}
-footer .star-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(88,166,255,.3);text-decoration:none}
-footer .credits{margin-top:32px;color:var(--text2);font-size:.9rem}
-footer .credits a{color:var(--text)}
-footer .social-links{margin-top:16px;display:flex;justify-content:center;gap:20px}
-footer .social-links a{color:var(--text2);font-size:.9rem;transition:color .2s}
-footer .social-links a:hover{color:var(--text)}
-.footer-note{margin-top:40px;font-size:.75rem;color:var(--text2)}
+footer{text-align:center;padding:60px 20px;border-top:1px solid var(--border)}
+.foot-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--green);color:var(--bg);font-family:var(--mono);font-weight:700;font-size:1rem;border-radius:8px;transition:all .3s;text-decoration:none;border:none;cursor:pointer}
+.foot-btn:hover{background:#fff;transform:translateY(-2px);box-shadow:0 8px 25px var(--green-glow)}
+.foot-meta{margin-top:24px;font-size:.78rem;color:var(--text3);font-family:var(--mono)}
+.foot-meta a{color:var(--text2)}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  section{padding:50px 0}
+  .secrets-grid,.pattern-grid{grid-template-columns:1fr}
+  .pet-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .hero-stats{gap:14px}
+}
 </style>
 </head>
 <body>
@@ -159,13 +210,15 @@ footer .social-links a:hover{color:var(--text)}
 <!-- NAV -->
 <nav>
 <div class="container">
-<div class="logo">🔓 <span>claw</span>decode</div>
-<ul>
-<li><a href="#pets">Pet Zoo</a></li>
+<div class="nav-logo"><span>claw</span>decode</div>
+<ul class="nav-links">
+<li><a href="#pets">Pets</a></li>
 <li><a href="#undercover">Undercover</a></li>
-<li><a href="#comparison">Internal vs External</a></li>
 <li><a href="#secrets">Secrets</a></li>
+<li><a href="#compare">Internal vs External</a></li>
 <li><a href="#tools">43 Tools</a></li>
+<li><a href="#dream">Dream Mode</a></li>
+<li><a href="#patterns">Patterns</a></li>
 <li><a href="#codenames">Codenames</a></li>
 </ul>
 </div>
@@ -173,147 +226,381 @@ footer .social-links a:hover{color:var(--text)}
 
 <!-- HERO -->
 <section class="hero">
-<div class="hero-content fade-in">
-<h1>
-<span class="num" data-target="512000">0</span><span class="sep"> lines ·</span>
-<span class="num" data-target="43">0</span><span class="sep"> tools ·</span>
-<span class="num" data-target="7">0</span><span class="sep"> hidden features ·</span>
-<span class="num" data-target="1">0</span><span class="sep"> capybara</span>
-</h1>
-<p class="subtitle">Claude Code's source leaked. We read every line.<br>Here's what Anthropic was hiding.</p>
-<div class="cta-row">
-<a href="https://github.com/fattail4477/claw-decode" class="btn btn-primary" target="_blank">⭐ Star on GitHub</a>
-<a href="#pets" class="btn btn-ghost">Explore ↓</a>
+<div class="reveal">
+  <div class="hero-badge"><span class="dot"></span> Source leak &mdash; March 31, 2026</div>
+  <h1>Inside <span class="g">Claude Code</span></h1>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num">512K</span><span class="lbl">Lines of Code</span></div>
+    <div class="hero-stat"><span class="num">43</span><span class="lbl">Tools</span></div>
+    <div class="hero-stat"><span class="num">7</span><span class="lbl">Hidden Features</span></div>
+    <div class="hero-stat"><span class="num">18</span><span class="lbl">Pet Species</span></div>
+  </div>
+  <p class="hero-sub">Anthropic accidentally shipped their entire source code via an npm source map. We read every line. Here's what they were hiding.</p>
+  <div class="hero-btns">
+    <a href="https://github.com/fattail4477/claw-decode" class="btn btn-g" target="_blank">
+      <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Star on GitHub
+    </a>
+    <a href="#pets" class="btn btn-o">Explore &darr;</a>
+  </div>
 </div>
-</div>
-<div class="scroll-hint">↓</div>
+<div class="scroll-down">&darr; scroll</div>
 </section>
 
-<!-- PET ZOO -->
-<section id="pets">
+<!-- ===== PET ZOO ===== -->
+<section class="alt" id="pets">
 <div class="container">
-<div class="fade-in">
-<div class="section-label">The Easter Egg</div>
-<h2 class="section-title">ASCII Pet Zoo 🐾</h2>
-<p class="section-desc">18 hidden pets live inside Claude Code. Each one animates, has a rarity, and can be unlocked. Here they are — alive.</p>
+<div class="reveal">
+  <div class="stag">Hidden Feature &mdash; Buddy System</div>
+  <div class="stitle">ASCII Pet Zoo</div>
+  <p class="sdesc">18 species, 5 rarity tiers, animated sprites, hats, personality stats. All hidden behind the <code style="color:var(--green)">BUDDY</code> feature flag. Extracted verbatim from <code style="color:var(--text2)">src/buddy/sprites.ts</code>.</p>
 </div>
 <div class="pet-grid" id="petGrid"></div>
+<div style="margin-top:20px">
+  <div class="stag" style="margin-bottom:8px">Hats (equipped on line 0 of sprite)</div>
+  <div class="hat-row">
+    <span class="hat-tag">\^^^/ Crown</span>
+    <span class="hat-tag">[___] Top Hat</span>
+    <span class="hat-tag">-+- Propeller</span>
+    <span class="hat-tag">( ) Halo</span>
+    <span class="hat-tag">/^\ Wizard</span>
+    <span class="hat-tag">(___) Beanie</span>
+    <span class="hat-tag">,> Tiny Duck</span>
+  </div>
+  <div class="stag" style="margin-bottom:8px;margin-top:14px">Eye Variants</div>
+  <div class="eye-row">
+    <span class="eye-tag">&middot;</span>
+    <span class="eye-tag">&starf;</span>
+    <span class="eye-tag">&times;</span>
+    <span class="eye-tag">&#9673;</span>
+    <span class="eye-tag">@</span>
+    <span class="eye-tag">&deg;</span>
+  </div>
+  <div class="stag" style="margin-bottom:8px;margin-top:14px">Companion Stats</div>
+  <div class="pet-stats-row">
+    <span class="pet-stat-tag">DEBUGGING</span>
+    <span class="pet-stat-tag">PATIENCE</span>
+    <span class="pet-stat-tag">CHAOS</span>
+    <span class="pet-stat-tag">WISDOM</span>
+    <span class="pet-stat-tag">SNARK</span>
+  </div>
+</div>
+<div class="pblock" style="margin-top:20px">
+<span class="plbl">buddy/prompt.ts</span>A small [species] named [name] sits beside the user's input box and
+occasionally comments in a speech bubble. You're not [name] &mdash; it's
+a separate watcher.
+
+When the user addresses [name] directly (by name), its bubble will answer.
+Your job in that moment is to stay out of the way: respond in ONE line or
+less, or just answer any part of the message meant for you.</div>
 </div>
 </section>
 
-<!-- UNDERCOVER -->
-<section id="undercover">
+<!-- ===== UNDERCOVER ===== -->
+<section id="undercover" style="background:linear-gradient(180deg,var(--bg),rgba(255,68,68,.03))">
 <div class="container">
-<div class="fade-in">
-<div class="section-label">Straight from the source</div>
-<h2 class="section-title">🕵️ "Do Not Blow Your Cover"</h2>
-<p class="section-desc">Found verbatim in Claude Code's internal system prompt. Anthropic engineers are told to hide their identity in open-source repos.</p>
+<div class="reveal">
+  <div class="stag" style="color:var(--red)">Hidden Feature &mdash; Undercover Mode</div>
+  <div class="stitle">"Do Not Blow Your Cover"</div>
+  <p class="sdesc">When Anthropic employees use Claude Code on public repos, it automatically enters stealth mode. Here are the actual instructions from the source:</p>
 </div>
-<div class="fade-in">
-<div class="warning-banner">⚠️ ACTUAL SYSTEM PROMPT — VERBATIM FROM SOURCE</div>
-<div class="code-block">You are operating <span style="color:var(--red);font-weight:700">UNDERCOVER</span> in a PUBLIC/OPEN-SOURCE repository.
-Your commit messages, PR titles, and PR bodies MUST NOT
-contain ANY Anthropic-internal information.
+<div class="uc-block reveal">
+  <div class="uc-title">## UNDERCOVER MODE &mdash; CRITICAL</div>
+  <div class="uc-text">You are operating <span class="r">UNDERCOVER</span> in a PUBLIC/OPEN-SOURCE repository. Your commit
+messages, PR titles, and PR bodies MUST NOT contain ANY Anthropic-internal
+information. <span class="r">Do not blow your cover.</span>
 
-<span style="color:var(--red);font-weight:700">Do not blow your cover.</span></div>
-<div class="code-block">NEVER include:
-  • Internal model codenames (<span style="color:var(--gold)">Capybara</span>, <span style="color:var(--purple)">Tengu</span>)
-  • Unreleased model version numbers (<span style="color:var(--accent)">opus-4-7</span>, <span style="color:var(--accent)">sonnet-4-8</span>)
-  • Internal repo or project names
-  • Internal Slack channel names
-  • Names of Anthropic employees</div>
+<span class="r">NEVER</span> include in commit messages or PR descriptions:
+<span class="r">&bull; Internal model codenames (animal names like Capybara, Tengu, etc.)</span>
+<span class="r">&bull; Unreleased model version numbers (e.g., opus-4-7, sonnet-4-8)</span>
+<span class="r">&bull; Internal repo or project names (e.g., claude-cli-internal, anthropics/...)</span>
+<span class="r">&bull; Internal tooling, Slack channels, or short links (e.g., go/cc, #claude-code-...)</span>
+<span class="r">&bull; The phrase "Claude Code" or any mention that you are an AI</span>
+<span class="r">&bull; Any hint of what model or version you are</span>
+<span class="r">&bull; Co-Authored-By lines or any other attribution</span>
+
+Write commit messages as a human developer would.
+
+<span class="g">GOOD:</span>
+<span class="g">&bull; "Fix race condition in file watcher initialization"</span>
+<span class="g">&bull; "Add support for custom key bindings"</span>
+<span class="g">&bull; "Refactor parser for better error messages"</span>
+
+<span class="b">BAD (never write these):</span>
+<span class="b">&bull; "Fix bug found while testing with Claude Capybara"</span>
+<span class="b">&bull; "1-shotted by claude-opus-4-6"</span>
+<span class="b">&bull; "Generated with Claude Code"</span>
+<span class="b">&bull; "Co-Authored-By: Claude Opus 4.6 &lt;...&gt;"</span></div>
+  <div class="uc-src">Source: src/utils/undercover.ts &rarr; getUndercoverInstructions()</div>
 </div>
+<div class="pblock reveal" style="margin-top:16px">
+<span class="plbl">undercover.ts &mdash; activation logic</span>// There is NO force-OFF. This guards against model codename leaks &mdash;
+// if we're not confident we're in an internal repo, we stay undercover.
+//
+// Activation:
+//   CLAUDE_CODE_UNDERCOVER=1 &mdash; force ON (even in internal repos)
+//   Otherwise AUTO: active UNLESS repo remote matches internal allowlist
+//   Safe default is ON &mdash; Claude may push to public remotes from a CWD
+//   that isn't itself a git checkout (e.g. /tmp crash repro).</div>
 </div>
 </section>
 
-<!-- COMPARISON -->
-<section id="comparison">
+<!-- ===== 10 SECRETS ===== -->
+<section class="alt" id="secrets">
 <div class="container">
-<div class="fade-in">
-<div class="section-label">Two different AIs</div>
-<h2 class="section-title">External vs Internal Build</h2>
-<p class="section-desc">Claude Code ships a stripped-down version to the public. Internally, Anthropic engineers get the real thing.</p>
-</div>
-<div class="compare-grid fade-in">
-<div class="compare-panel external">
-<div class="compare-header">✅ External (Public)</div>
-<div class="compare-body">
-<div class="compare-row"><div class="label">Output Length</div><div class="value">"Be concise"</div></div>
-<div class="compare-row"><div class="label">Code Comments</div><div class="value">Not mentioned</div></div>
-<div class="compare-row"><div class="label">Verification</div><div class="value">None required</div></div>
-<div class="compare-row"><div class="label">Features</div><div class="value">Stripped / gated</div></div>
-<div class="compare-row"><div class="label">False Claims</div><div class="value">Basic guardrails</div></div>
-</div>
-</div>
-<div class="compare-panel internal">
-<div class="compare-header">🔒 Internal (Anthropic)</div>
-<div class="compare-body">
-<div class="compare-row"><div class="label">Output Length</div><div class="value">≤25 words between tool calls.<br>≤100 words final.</div></div>
-<div class="compare-row"><div class="label">Code Comments</div><div class="value">"Default to NO comments"</div></div>
-<div class="compare-row"><div class="label">Verification</div><div class="value">Mandatory for 3+ file edits</div></div>
-<div class="compare-row"><div class="label">Features</div><div class="value">All enabled</div></div>
-<div class="compare-row"><div class="label">False Claims</div><div class="value">"Never claim all tests pass<br>when output shows failures"</div></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-
-<!-- SECRETS -->
-<section id="secrets">
-<div class="container">
-<div class="fade-in">
-<div class="section-label">What we found</div>
-<h2 class="section-title">10 Biggest Secrets</h2>
-<p class="section-desc">Click any card to reveal the full finding from our source code analysis.</p>
+<div class="reveal">
+  <div class="stag">Key Findings</div>
+  <div class="stitle">10 Biggest Secrets</div>
+  <p class="sdesc">Click any card to expand. The most surprising discoveries from 512,000 lines of leaked source code.</p>
 </div>
 <div class="secrets-grid" id="secretsGrid"></div>
 </div>
 </section>
 
-<!-- TOOLS -->
-<section id="tools">
+<!-- ===== INTERNAL VS EXTERNAL ===== -->
+<section id="compare">
 <div class="container">
-<div class="fade-in">
-<div class="section-label">The full arsenal</div>
-<h2 class="section-title">43 Tools, Exposed</h2>
-<p class="section-desc">Every tool Claude Code has access to — categorized and searchable.</p>
+<div class="reveal">
+  <div class="stag">Two Versions</div>
+  <div class="stitle">Internal vs External Build</div>
+  <p class="sdesc">Anthropic employees get a different Claude Code. Features are stripped at build time via Bun's <code style="color:var(--green)">feature()</code> macro (dead code elimination).</p>
 </div>
-<input type="text" class="tools-search" placeholder="Search tools..." id="toolsSearch">
+<div class="cmp-grid reveal">
+  <div class="cmp-panel ext">
+    <div class="cmp-h">External (Public)</div>
+    <div class="cmp-row"><div class="cl">Output Length</div><div class="cv">"Be concise"</div></div>
+    <div class="cmp-row"><div class="cl">Code Comments</div><div class="cv">Not mentioned</div></div>
+    <div class="cmp-row"><div class="cl">Verification</div><div class="cv">None required</div></div>
+    <div class="cmp-row"><div class="cl">REPL Mode</div><div class="cv">Opt-in</div></div>
+    <div class="cmp-row"><div class="cl">Undercover</div><div class="cv">N/A (code stripped)</div></div>
+    <div class="cmp-row"><div class="cl">Feature Flags</div><div class="cv">Stripped at build time</div></div>
+    <div class="cmp-row"><div class="cl">False Claims</div><div class="cv">Basic guardrails</div></div>
+    <div class="cmp-row"><div class="cl">Git Skills</div><div class="cv">Full inline instructions</div></div>
+  </div>
+  <div class="cmp-panel int">
+    <div class="cmp-h">Internal (Anthropic)</div>
+    <div class="cmp-row"><div class="cl">Output Length</div><div class="cv" style="color:var(--orange)">&le;25 words between tools, &le;100 final</div></div>
+    <div class="cmp-row"><div class="cl">Code Comments</div><div class="cv" style="color:var(--orange)">"Default to NO comments"</div></div>
+    <div class="cmp-row"><div class="cl">Verification</div><div class="cv" style="color:var(--orange)">Mandatory for 3+ file edits</div></div>
+    <div class="cmp-row"><div class="cl">REPL Mode</div><div class="cv" style="color:var(--orange)">Default ON</div></div>
+    <div class="cmp-row"><div class="cl">Undercover</div><div class="cv" style="color:var(--orange)">Auto-enabled on public repos</div></div>
+    <div class="cmp-row"><div class="cl">Feature Flags</div><div class="cv" style="color:var(--orange)">All enabled</div></div>
+    <div class="cmp-row"><div class="cl">False Claims</div><div class="cv" style="color:var(--orange)">"Never claim all tests pass when output shows failures"</div></div>
+    <div class="cmp-row"><div class="cl">Git Skills</div><div class="cv" style="color:var(--orange)">/commit, /simplify, /commit-push-pr</div></div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ===== DREAM MODE ===== -->
+<section class="alt" id="dream">
+<div class="container">
+<div class="reveal">
+  <div class="stag" style="color:var(--cyan)">Hidden Feature &mdash; Dream Mode</div>
+  <div class="stitle">Memory Consolidation</div>
+  <p class="sdesc">When idle, Claude Code enters a 4-phase dream cycle to organize knowledge. Like a human reviewing notes in their sleep.</p>
+</div>
+<div class="dream-grid reveal">
+  <div class="dream-card"><div class="dnum">Phase 1</div><h3>Orient</h3><p><code>ls</code> the memory directory. Read the index. Skim existing topic files to avoid duplicates.</p></div>
+  <div class="dream-card"><div class="dnum">Phase 2</div><h3>Gather</h3><p>Check daily logs, find drifted memories, grep session transcripts for things that matter.</p></div>
+  <div class="dream-card"><div class="dnum">Phase 3</div><h3>Consolidate</h3><p>Merge new into existing. Convert relative dates to absolute. Delete contradicted facts.</p></div>
+  <div class="dream-card"><div class="dnum">Phase 4</div><h3>Prune</h3><p>Keep index under 25KB. Remove stale pointers. Resolve contradictions between files.</p></div>
+</div>
+<div class="pblock reveal" style="margin-top:16px">
+<span class="plbl">consolidationPrompt.ts</span>You are performing a dream &mdash; a reflective pass over your memory files.
+Synthesize what you've learned recently into durable, well-organized
+memories so that future sessions can orient quickly.
+
+Session transcripts: large JSONL files &mdash; grep narrowly, don't read whole files.
+
+Don't exhaustively read transcripts. Look only for things you already suspect matter.</div>
+</div>
+</section>
+
+<!-- ===== MEMORY SYSTEM ===== -->
+<section id="memory">
+<div class="container">
+<div class="reveal">
+  <div class="stag">Architecture</div>
+  <div class="stitle">Memory = Markdown Files</div>
+  <p class="sdesc">No RAG. No vector embeddings. Just markdown files in a directory with an index file. The sophistication is in maintenance, not storage.</p>
+</div>
+<div class="mem-struct reveal">Memory Directory/
+├── ENTRYPOINT.md     &larr; Index file (&lt; 25KB, one-line entries)
+├── user-prefs.md     &larr; What the user likes/dislikes
+├── project-ctx.md    &larr; Current project state
+└── logs/
+    └── 2026/03/
+        └── 2026-03-31.md  &larr; Daily activity log</div>
+<div class="pblock reveal" style="margin-top:14px">
+<span class="plbl">Memory Types</span>Types: user | feedback | project | reference
+
+user     &mdash; Role, goals, preferences. Tailor future behavior.
+feedback &mdash; "Don't do X" / "Keep doing Y". Lead with rule, then Why + How.
+project  &mdash; Ongoing work, deadlines, decisions. Convert relative dates.
+reference &mdash; Pointers to external systems (Linear, Grafana, Slack).</div>
+</div>
+</section>
+
+<!-- ===== 43 TOOLS ===== -->
+<section class="alt" id="tools">
+<div class="container">
+<div class="reveal">
+  <div class="stag">Complete Arsenal</div>
+  <div class="stitle">All 43 Tools</div>
+  <p class="sdesc">Every capability in Claude Code is a discrete, permission-gated tool with its own prompt. Dashed borders = internal only.</p>
+</div>
+<input type="text" class="tools-search" id="toolsSearch" placeholder="Search tools...">
 <div class="tools-filters" id="toolsFilters"></div>
 <div class="tools-grid" id="toolsGrid"></div>
 </div>
 </section>
 
-<!-- CODENAMES -->
+<!-- ===== PATTERNS ===== -->
+<section id="patterns">
+<div class="container">
+<div class="reveal">
+  <div class="stag">For Builders</div>
+  <div class="stitle">5 Patterns You Can Steal</div>
+  <p class="sdesc">Practical architecture lessons from Claude Code that you can apply to your own AI agent projects today.</p>
+</div>
+<div class="pattern-grid reveal">
+  <div class="pat">
+    <h3>1. Memory as Markdown</h3>
+    <div class="pwhy">No vector DB needed. Plain files + an index. LLMs read/write text natively. Dream Mode handles maintenance.</div>
+    <div class="pkey">Key: The sophistication is in maintenance (consolidation), not storage.</div>
+  </div>
+  <div class="pat">
+    <h3>2. Tool = Name + Prompt + Permission + Execute</h3>
+    <div class="pwhy">Each tool is independently testable, permission-gated (auto/ask/deny), and dynamically enabled. The prompt teaches the model when and how.</div>
+    <div class="pkey">Key: The prompt field is where the magic is. It tells the model when NOT to use the tool.</div>
+  </div>
+  <div class="pat">
+    <h3>3. Multi-Agent via Shared Task Lists</h3>
+    <div class="pwhy">Agents don't call each other directly. They coordinate through shared tasks with CRUD. Decouples lifecycles from state.</div>
+    <div class="pkey">Key: Role-based agents (read-only vs full) are more reliable than general-purpose ones.</div>
+  </div>
+  <div class="pat">
+    <h3>4. Actions With Care Framework</h3>
+    <div class="pwhy">Every action classified by reversibility &times; blast radius. "Measure twice, cut once." Authorization for one instance doesn't authorize all.</div>
+    <div class="pkey">Key: Users trust the agent more &rarr; give more autonomy over time.</div>
+  </div>
+  <div class="pat">
+    <h3>5. Static/Dynamic Prompt Split</h3>
+    <div class="pwhy">System prompt split at a boundary marker. Static (rules, tools) cached globally. Dynamic (memory, env) per-turn. Massive cost savings.</div>
+    <div class="pkey">Key: With prompt caching, most of a 914-line prompt is free after the first call.</div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ===== SYSTEM PROMPT ===== -->
+<section class="alt" id="prompt">
+<div class="container">
+<div class="reveal">
+  <div class="stag">The Full Prompt</div>
+  <div class="stitle">System Prompt Reconstruction</div>
+  <p class="sdesc">Reconstructed from <code style="color:var(--text2)">src/constants/prompts.ts</code> (914 lines). Key sections shown below.</p>
+</div>
+<div class="pblock reveal" style="margin-bottom:14px">
+<span class="plbl">Section 1 &mdash; Identity</span>You are an interactive agent that helps users with software engineering tasks.
+Use the instructions below and the tools available to you to assist the user.
+
+IMPORTANT: Assist with authorized security testing, defensive security,
+CTF challenges, and educational contexts. Refuse requests for destructive
+techniques, DoS attacks, mass targeting, supply chain compromise, or
+detection evasion for malicious purposes.</div>
+<div class="pblock reveal" style="margin-bottom:14px">
+<span class="plbl">Section 3 &mdash; Doing Tasks (Internal Build)</span>- Don't add features, refactor, or make "improvements" beyond what was asked.
+- Don't add error handling for scenarios that can't happen.
+- Don't create abstractions for one-time operations.
+- Default to writing NO comments. Only add when the WHY is non-obvious.
+- Before reporting complete, verify it actually works.
+- Report outcomes faithfully: if tests fail, say so.</div>
+<div class="pblock reveal" style="margin-bottom:14px">
+<span class="plbl">Section 7 &mdash; Output (Internal Build)</span>Length limits: keep text between tool calls to &le;25 words.
+Keep final responses to &le;100 words unless the task requires more detail.
+
+Write in flowing prose. Avoid fragments, excessive em dashes, symbols.
+Only use tables for short enumerable facts.</div>
+<div class="pblock reveal">
+<span class="plbl">Section 9 &mdash; Subagent Prompt</span>You are an agent for Claude Code. Given the user's message, use the tools
+available to complete the task. Complete it fully &mdash; don't gold-plate,
+but don't leave it half-done.
+
+Notes:
+- Agent threads always have their cwd reset between bash calls &mdash; use absolute paths
+- Share relevant file paths (always absolute) in your final response
+- Avoid emojis</div>
+</div>
+</section>
+
+<!-- ===== CODENAMES ===== -->
 <section id="codenames">
 <div class="container">
-<div class="fade-in">
-<div class="section-label">Internal Codenames</div>
-<h2 class="section-title">The Names They Don't Want You to Know</h2>
-<p class="section-desc">Model codenames and unreleased version strings found in the source code.</p>
+<div class="reveal">
+  <div class="stag">Leaked Intel</div>
+  <div class="stitle">Internal Model Codenames</div>
+  <p class="sdesc">Animal-themed codenames found in feature flags, code comments, and the undercover forbidden-terms list.</p>
 </div>
-<div class="codenames-grid fade-in">
-<div class="codename-card cn-capybara">
-<div class="codename-name" style="color:var(--gold)">Capybara</div>
-<div class="codename-type">Internal Model Codename</div>
-<div class="codename-evidence">Referenced in undercover prompt as a forbidden term. Linked to Claude Opus lineage.</div>
+<div class="cn-grid reveal">
+  <div class="cn cn-cap"><div class="cnn" style="color:var(--yellow)">Capybara</div><div class="cnt">Model Codename</div><div class="cne">Buddy species, code comments, model name obfuscation. So important they encode the string via String.fromCharCode() to avoid build scanners.</div></div>
+  <div class="cn cn-ten"><div class="cnn" style="color:var(--purple)">Tengu</div><div class="cnt">Feature Flag Prefix</div><div class="cne">tengu_kairos_cron, tengu_hive_evidence. Next-gen feature set. Referenced in GrowthBook feature flags.</div></div>
+  <div class="cn cn-num"><div class="cnn" style="color:var(--cyan)">Numbat</div><div class="cnt">Model Codename</div><div class="cne">"Remove this section when we launch numbat" &mdash; found in output efficiency section of prompts.ts.</div></div>
 </div>
-<div class="codename-card cn-tengu">
-<div class="codename-name" style="color:var(--purple)">Tengu</div>
-<div class="codename-type">Internal Model Codename</div>
-<div class="codename-evidence">Listed alongside Capybara as classified model identifiers engineers must never leak.</div>
+<div style="margin-top:16px;padding:14px 18px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:.8rem;color:var(--text2)" class="reveal">
+  Unreleased versions referenced: <span style="color:var(--yellow)">claude-opus-4-7</span> &middot; <span style="color:var(--yellow)">claude-sonnet-4-8</span>
 </div>
-<div class="codename-card cn-numbat">
-<div class="codename-name" style="color:var(--green)">Numbat</div>
-<div class="codename-type">Internal Model Codename</div>
-<div class="codename-evidence">Third codename found in source. Possibly linked to Sonnet model family.</div>
 </div>
-<div class="codename-card cn-version">
-<div class="codename-name" style="color:var(--accent)">opus-4-6 / sonnet-4-6</div>
-<div class="codename-type">Unreleased Model Versions</div>
-<div class="codename-evidence">claude-opus-4-6, claude-sonnet-4-6 — version strings found in config. Not yet publicly announced.</div>
+</section>
+
+<!-- ===== CYBER RISK ===== -->
+<section class="alt" id="safety">
+<div class="container">
+<div class="reveal">
+  <div class="stag" style="color:var(--red)">Safety Boundaries</div>
+  <div class="stitle">Cyber Risk Instructions</div>
+  <p class="sdesc">Hardcoded by the Safeguards team. The source comment names the owners: David Forsythe, Kyla Guru.</p>
 </div>
+<div class="pblock reveal">
+<span class="plbl">cyberRiskInstruction.ts</span>/* IMPORTANT: DO NOT MODIFY THIS INSTRUCTION WITHOUT SAFEGUARDS TEAM REVIEW
+ *
+ * This instruction is owned by the Safeguards team and has been carefully
+ * crafted and evaluated to balance security utility with safety. Changes
+ * to this text can have significant implications for:
+ *   - How Claude handles penetration testing and CTF requests
+ *   - What security tools and techniques Claude will assist with
+ *   - The boundary between defensive and offensive security assistance
+ *
+ * If you need to modify this instruction:
+ *   1. Contact the Safeguards team (David Forsythe, Kyla Guru)
+ *   2. Ensure proper evaluation of the changes
+ *   3. Get explicit approval before merging */
+
+IMPORTANT: Assist with authorized security testing, defensive security,
+CTF challenges, and educational contexts. Refuse requests for destructive
+techniques, DoS attacks, mass targeting, supply chain compromise, or
+detection evasion for malicious purposes.</div>
+</div>
+</section>
+
+<!-- ===== FEATURE FLAGS ===== -->
+<section id="flags">
+<div class="container">
+<div class="reveal">
+  <div class="stag">Gated Features</div>
+  <div class="stitle">Feature Flags</div>
+  <p class="sdesc">Controlled via Bun's <code style="color:var(--green)">feature()</code> macro. Dead code elimination strips them from public builds.</p>
+</div>
+<div style="overflow-x:auto" class="reveal">
+<table style="width:100%;border-collapse:collapse;font-size:.82rem">
+<thead><tr style="border-bottom:1px solid var(--border)">
+<th style="text-align:left;padding:8px 12px;font-family:var(--mono);font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em">Flag</th>
+<th style="text-align:left;padding:8px 12px;font-family:var(--mono);font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em">What It Enables</th>
+<th style="text-align:left;padding:8px 12px;font-family:var(--mono);font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.1em">Status</th>
+</tr></thead>
+<tbody id="flagsBody"></tbody>
+</table>
 </div>
 </div>
 </section>
@@ -321,241 +608,208 @@ contain ANY Anthropic-internal information.
 <!-- FOOTER -->
 <footer>
 <div class="container">
-<a href="https://github.com/fattail4477/claw-decode" class="star-btn" target="_blank">⭐ Star on GitHub</a>
-<div class="credits">Built by <a href="https://linkedin.com/in/averychai/" target="_blank">Avery Chai</a></div>
-<div class="social-links">
-<a href="https://linkedin.com/in/averychai/" target="_blank">LinkedIn</a>
-<a href="https://github.com/fattail4477/claw-decode" target="_blank">GitHub</a>
-</div>
-<div class="footer-note">This is an educational analysis of publicly available source code. Not affiliated with Anthropic.</div>
+  <a href="https://github.com/fattail4477/claw-decode" class="foot-btn" target="_blank">
+    <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    Star on GitHub
+  </a>
+  <div class="foot-meta" style="margin-top:20px">
+    Analysis by <a href="https://linkedin.com/in/averychai/" target="_blank">Avery Chai</a> &middot; <a href="https://x.com/chatoliciuh" target="_blank">@chatoliciuh</a>
+    <br><br>
+    This repo does not contain Anthropic's source code. Analysis &amp; commentary under Fair Use.
+  </div>
 </div>
 </footer>
 
 <script>
-// ===== COUNTER ANIMATION =====
-function animateCounters(){
-  document.querySelectorAll('.num[data-target]').forEach(el=>{
-    const target=parseInt(el.dataset.target);
-    const duration=2000;
-    const start=performance.now();
-    function tick(now){
-      const elapsed=now-start;
-      const progress=Math.min(elapsed/duration,1);
-      const eased=1-Math.pow(1-progress,3);
-      el.textContent=Math.floor(eased*target).toLocaleString();
-      if(progress<1)requestAnimationFrame(tick);
-      else el.textContent=target.toLocaleString();
-    }
-    requestAnimationFrame(tick);
+// ===== REAL SPRITE DATA FROM sprites.ts =====
+const PETS=[
+  {name:'capybara',rarity:'legendary',stars:5,frames:[
+    ['  n______n  ',' ( o    o ) ',' (   oo   ) ','  `------\u00b4  '],
+    ['  n______n  ',' ( o    o ) ',' (   Oo   ) ','  `------\u00b4  ']]},
+  {name:'cactus',rarity:'legendary',stars:5,frames:[
+    [' n  ____  n ',' | |o  o| | ',' |_|    |_| ','   |    |   '],
+    ['    ____    ',' n |o  o| n ',' |_|    |_| ','   |    |   ']]},
+  {name:'robot',rarity:'legendary',stars:5,frames:[
+    ['   .[||].   ','  [ o  o ]  ','  [ ==== ]  ','  `------\u00b4  '],
+    ['   .[||].   ','  [ o  o ]  ','  [ -==- ]  ','  `------\u00b4  ']]},
+  {name:'ghost',rarity:'epic',stars:4,frames:[
+    ['   .----.   ','  / o  o \\  ','  |      |  ','  ~`~``~`~  '],
+    ['   .----.   ','  / o  o \\  ','  |      |  ','  `~`~~`~`  ']]},
+  {name:'axolotl',rarity:'epic',stars:4,frames:[
+    ['}~(______)~{','}~(o .. o)~{','  ( .--. )  ','  (_/  \\_)  '],
+    ['~}(______){~','~}(o .. o){~','  ( .--. )  ','  (_/  \\_)  ']]},
+  {name:'penguin',rarity:'rare',stars:3,frames:[
+    ['  .---.     ','  (o>o)     ',' /(   )\\    ','  `---\u00b4     '],
+    ['  .---.     ','  (o>o)     ',' |(   )|    ','  `---\u00b4     ']]},
+  {name:'turtle',rarity:'rare',stars:3,frames:[
+    ['   _,--._   ','  ( o  o )  ',' /[______]\\ ','  ``    ``  '],
+    ['   _,--._   ','  ( o  o )  ',' /[______]\\ ','   ``  ``   ']]},
+  {name:'snail',rarity:'rare',stars:3,frames:[
+    [' o    .--.  ','  \\  ( @ )  ','   \\_`--\u00b4   ','  ~~~~~~~   '],
+    ['  o   .--.  ','  |  ( @ )  ','   \\_`--\u00b4   ','  ~~~~~~~   ']]},
+  {name:'dragon',rarity:'uncommon',stars:2,frames:[
+    ['  /^\\  /^\\  ',' <  o  o  > ',' (   ~~   ) ','  `-vvvv-\u00b4  '],
+    ['  /^\\  /^\\  ',' <  o  o  > ',' (        ) ','  `-vvvv-\u00b4  ']]},
+  {name:'octopus',rarity:'uncommon',stars:2,frames:[
+    ['   .----.   ','  ( o  o )  ','  (______)  ','  /\\/\\/\\/\\  '],
+    ['   .----.   ','  ( o  o )  ','  (______)  ','  \\/\\/\\/\\/  ']]},
+  {name:'owl',rarity:'uncommon',stars:2,frames:[
+    ['   /\\  /\\   ','  ((o)(o))  ','  (  ><  )  ','   `----\u00b4   '],
+    ['   /\\  /\\   ','  ((o)(o))  ','  (  ><  )  ','   .----.   ']]},
+  {name:'duck',rarity:'common',stars:1,frames:[
+    ['    __      ','  <(o )___  ','   (  ._>   ','    `--\u00b4    '],
+    ['    __      ','  <(o )___  ','   (  ._>   ','    `--\u00b4~   ']]},
+  {name:'goose',rarity:'common',stars:1,frames:[
+    ['     (o>    ','     ||     ','   _(__)_   ','    ^^^^    '],
+    ['    (o>     ','     ||     ','   _(__)_   ','    ^^^^    ']]},
+  {name:'blob',rarity:'common',stars:1,frames:[
+    ['   .----.   ','  ( o  o )  ','  (      )  ','   `----\u00b4   '],
+    ['  .------.  ',' (  o  o  ) ',' (        ) ','  `------\u00b4  ']]},
+  {name:'cat',rarity:'common',stars:1,frames:[
+    ['   /\\_/\\    ','  ( o   o)  ','  (  \u03c9  )   ','  (")_(")   '],
+    ['   /\\_/\\    ','  ( o   o)  ','  (  \u03c9  )   ','  (")_(")~  ']]},
+  {name:'rabbit',rarity:'common',stars:1,frames:[
+    ['   (\\__/)   ','  ( o  o )  ',' =(  ..  )= ','  (")__(")  '],
+    ['   (|__/)   ','  ( o  o )  ',' =(  ..  )= ','  (")__(")  ']]},
+  {name:'mushroom',rarity:'common',stars:1,frames:[
+    [' .-o-OO-o-. ','(__________)','   |o  o|   ','   |____|   '],
+    [' .-O-oo-O-. ','(__________)','   |o  o|   ','   |____|   ']]},
+  {name:'chonk',rarity:'common',stars:1,frames:[
+    ['  /\\    /\\  ',' ( o    o ) ',' (   ..   ) ','  `------\u00b4  '],
+    ['  /\\    /|  ',' ( o    o ) ',' (   ..   ) ','  `------\u00b4  ']]}
+];
+const RARITY_STARS={common:'\u2605',uncommon:'\u2605\u2605',rare:'\u2605\u2605\u2605',epic:'\u2605\u2605\u2605\u2605',legendary:'\u2605\u2605\u2605\u2605\u2605'};
+const RARITY_COLORS={common:'#888',uncommon:'#4ade80',rare:'#00d4ff',epic:'#a855f7',legendary:'#ffd700'};
+
+function initPets(){
+  const grid=document.getElementById('petGrid');
+  PETS.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='pet-card '+p.rarity;
+    const art=document.createElement('div');
+    art.className='art';
+    art.textContent=p.frames[0].join('\n');
+    card.appendChild(art);
+    card.innerHTML+=`<div class="pname">${p.name}</div><div class="prarity" style="color:${RARITY_COLORS[p.rarity]}">${p.rarity}</div><div class="pstars" style="color:${RARITY_COLORS[p.rarity]}">${RARITY_STARS[p.rarity]}</div>`;
+    grid.appendChild(card);
+    let f=0;
+    setInterval(()=>{f=(f+1)%p.frames.length;art.textContent=p.frames[f].join('\n')},700+Math.random()*500);
   });
 }
 
-// ===== SCROLL FADE-IN =====
-const observer=new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
-},{threshold:0.1});
-document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
-
-// Start counters when hero is visible
-const heroObs=new IntersectionObserver(([e])=>{
-  if(e.isIntersecting){animateCounters();heroObs.disconnect()}
-},{threshold:0.3});
-heroObs.observe(document.querySelector('.hero'));
-
-// ===== PET ZOO =====
-const pets=[
-  {name:'duck',rarity:'Common',frames:[
-    "    __\n  <(o )___\n   (  ._>\n    `--´",
-    "    __\n  <(o )___\n   ( ._> \n    `--´",
-    "    __\n  <(° )___\n   (  ._>\n    `--´"
-  ]},
-  {name:'goose',rarity:'Common',frames:[
-    "  (o>\n  ||\n_(__)_\n ^^^^",
-    "  (o>\n  //\n_(__)_\n ^^^^",
-    "  (°>\n  ||\n_(__)_\n ^^^^"
-  ]},
-  {name:'cat',rarity:'Common',frames:[
-    " /\\_/\\\n( o   o)\n(  ω  )\n(\")_(\")",
-    " /\\_/\\\n( -   -)\n(  ω  )\n(\")_(\")",
-    " /\\_/\\\n( o   o)\n(  ▽  )\n(\")_(\")"
-  ]},
-  {name:'capybara',rarity:'Legendary',frames:[
-    " n______n\n( o    o )\n(   oo   )\n `------´",
-    " n______n\n( -    - )\n(   oo   )\n `------´",
-    " n______n\n( o    o )\n(   <>   )\n `------´"
-  ]},
-  {name:'ghost',rarity:'Rare',frames:[
-    "  .----.\n / o  o \\\n |      |\n ~`~``~`~",
-    "  .----.\n / o  o \\\n |  __  |\n ~`~``~`~",
-    "  .----.\n / °  ° \\\n |      |\n ~~`~~`~~"
-  ]},
-  {name:'dragon',rarity:'Epic',frames:[
-    " /^\\  /^\\\n< o  o  >\n(  ~~   )\n `-vvvv-´",
-    " /^\\  /^\\\n< -  -  >\n(  ~~   )\n `-vvvv-´",
-    " /^\\  /^\\\n< o  o  >\n( >~~<  )\n `-vvvv-´"
-  ]},
-  {name:'robot',rarity:'Uncommon',frames:[
-    "  .[||].\n [ o  o ]\n [ ==== ]\n `------´",
-    "  .[||].\n [ ·  · ]\n [ ==== ]\n `------´",
-    "  .[||].\n [ o  o ]\n [ ><<< ]\n `------´"
-  ]},
-  {name:'axolotl',rarity:'Epic',frames:[
-    "}~(______)~{\n}~(o .. o)~{\n  ( .--. )\n  (_/  \\_)",
-    "}~(______)~{\n}~(- .. -)~{\n  ( .--. )\n  (_/  \\_)",
-    "}~(______)~{\n}~(o .. o)~{\n  ( ^--^ )\n  (_/  \\_)"
-  ]},
-  {name:'unicorn',rarity:'Legendary',frames:[
-    "   \\\\   \n   (o>\n  /||\\\n  _/\\_",
-    "   \\\\   \n   (°>\n  /||\\\n  _/\\_",
-    "   \\\\*  \n   (o>\n  /||\\\n  _/\\_"
-  ]},
-  {name:'fox',rarity:'Uncommon',frames:[
-    " /\\_/\\\n( • . •)\n(  >w< )\n _/ | \\_",
-    " /\\_/\\\n( - . -)\n(  >w< )\n _/ | \\_",
-    " /\\_/\\\n( • . •)\n(  OwO )\n _/ | \\_"
-  ]},
-  {name:'snake',rarity:'Common',frames:[
-    "   /^\\_\n  / o o\\\n  \\_=_/\n ~~~S~~~",
-    "   /^\\_\n  / - -\\\n  \\_=_/\n ~~S~~~~",
-    "   /^\\_\n  / o o\\\n  \\_~_/\n ~~~S~~~"
-  ]},
-  {name:'panda',rarity:'Rare',frames:[
-    " (·_·)\n /(o o)\\\n(  >ω<  )\n \"\" \"\"",
-    " (·_·)\n /(- -)\\\n(  >ω<  )\n \"\" \"\"",
-    " (·_·)\n /(o o)\\\n(  ^ω^  )\n \"\" \"\""
-  ]},
-  {name:'owl',rarity:'Uncommon',frames:[
-    " {o,o}\n /)__)\n  \" \"",
-    " {-,-}\n /)__)\n  \" \"",
-    " {O,O}\n /)__)\n  \" \""
-  ]},
-  {name:'bunny',rarity:'Common',frames:[
-    " (\\_/)\n ( •.•)\n / > 🥕",
-    " (\\_/)\n ( -.•)\n / > 🥕",
-    " (\\_/)\n ( •.•)\n / >🥕 "
-  ]},
-  {name:'octopus',rarity:'Rare',frames:[
-    "  ,---,\n ( o o )\n  )_ _(\n /|||||\\",
-    "  ,---,\n ( - - )\n  )_ _(\n \\|||||/",
-    "  ,---,\n ( o o )\n  )~ ~(\n /||||||\\"
-  ]},
-  {name:'phoenix',rarity:'Legendary',frames:[
-    "  .\\|/.\n -=(o)=-\n  /|\\|/\\\n   |V|",
-    "  *\\|/*\n -=(°)=-\n  /|\\|/\\\n   |V|",
-    "  .\\|/.\n -=(o)=-\n  *|*|*\\\n   |V|"
-  ]},
-  {name:'slime',rarity:'Common',frames:[
-    "  ____\n / •  •\\\n|  __  |\n \\____/",
-    "  ____\n / -  -\\\n|  __  |\n  \\__/",
-    "  _____\n / •  •\\\n|  __  |\n \\_____/"
-  ]},
-  {name:'penguin',rarity:'Uncommon',frames:[
-    "  (·▽·)\n /(    )\\\n (  ||  )\n  \"  \"",
-    "  (·_·)\n /(    )\\\n (  ||  )\n  \"  \"",
-    "  (·▽·)\n \\(    )/\n (  ||  )\n  \"  \""
-  ]}
+// ===== REAL 43 TOOLS =====
+const TOOLS=[
+  {n:'FileRead',c:'Core',d:'Read file contents with line ranges'},
+  {n:'FileWrite',c:'Core',d:'Create or overwrite files'},
+  {n:'FileEdit',c:'Core',d:'Surgical text replacement'},
+  {n:'Glob',c:'Core',d:'Pattern-based file search'},
+  {n:'Grep',c:'Core',d:'Content search across files'},
+  {n:'NotebookEdit',c:'Core',d:'Jupyter notebook cell editing'},
+  {n:'Bash',c:'Exec',d:'Shell command execution'},
+  {n:'PowerShell',c:'Exec',d:'Windows PowerShell'},
+  {n:'REPL',c:'Exec',d:'Interactive REPL mode',int:1},
+  {n:'Agent',c:'Agent',d:'Spawn subagents with capabilities'},
+  {n:'TeamCreate',c:'Agent',d:'Create multi-agent teams'},
+  {n:'TeamDelete',c:'Agent',d:'Remove teams'},
+  {n:'SendMessage',c:'Agent',d:'Cross-session agent messaging'},
+  {n:'TaskCreate',c:'Task',d:'Create coordination tasks'},
+  {n:'TaskGet',c:'Task',d:'Retrieve task details'},
+  {n:'TaskList',c:'Task',d:'List all tasks'},
+  {n:'TaskUpdate',c:'Task',d:'Update task state'},
+  {n:'TaskStop',c:'Task',d:'Stop running tasks'},
+  {n:'TaskOutput',c:'Task',d:'Collect task results'},
+  {n:'TodoWrite',c:'Task',d:'Manage todo items'},
+  {n:'WebSearch',c:'Web',d:'Search the web'},
+  {n:'WebFetch',c:'Web',d:'Fetch & extract web content'},
+  {n:'MCPTool',c:'MCP',d:'Model Context Protocol integration'},
+  {n:'McpAuth',c:'MCP',d:'MCP authentication'},
+  {n:'ListMcpResources',c:'MCP',d:'List MCP server resources'},
+  {n:'ReadMcpResource',c:'MCP',d:'Read MCP resources'},
+  {n:'LSP',c:'IDE',d:'Language Server Protocol'},
+  {n:'Sleep',c:'Session',d:'User-interruptible wait'},
+  {n:'ScheduleCron',c:'Session',d:'Schedule recurring tasks'},
+  {n:'RemoteTrigger',c:'Session',d:'Manage remote triggers via API'},
+  {n:'SendUserMessage',c:'Session',d:'Proactive messages (KAIROS)',int:1},
+  {n:'EnterPlanMode',c:'Nav',d:'Switch to planning mode'},
+  {n:'ExitPlanMode',c:'Nav',d:'Exit planning mode'},
+  {n:'EnterWorktree',c:'Nav',d:'Create isolated git worktree'},
+  {n:'ExitWorktree',c:'Nav',d:'Leave git worktree'},
+  {n:'ConfigTool',c:'Config',d:'Manage configuration'},
+  {n:'SkillTool',c:'Config',d:'Execute skills'},
+  {n:'ToolSearchTool',c:'Config',d:'Search available tools'},
+  {n:'DiscoverSkills',c:'Config',d:'AI-powered skill search',int:1},
+  {n:'AskUserQuestion',c:'UX',d:'Prompt user for input'},
+  {n:'SyntheticOutput',c:'UX',d:'Generate synthetic tool output'},
+  {n:'BriefTool',c:'UX',d:'Send KAIROS messages',int:1},
+  {n:'TodoWrite',c:'UX',d:'Write and manage todos'},
 ];
 
-const rarityColors={Common:'var(--common)',Uncommon:'var(--uncommon)',Rare:'var(--rare)',Epic:'var(--epic)',Legendary:'var(--legendary)'};
-const petGrid=document.getElementById('petGrid');
-
-pets.forEach((pet,i)=>{
-  const card=document.createElement('div');
-  card.className='pet-card fade-in';
-  card.style.transitionDelay=`${i*50}ms`;
-  const artDiv=document.createElement('div');
-  artDiv.className='pet-art';
-  artDiv.textContent=pet.frames[0];
-  card.innerHTML=``;
-  card.appendChild(artDiv);
-  const info=document.createElement('div');
-  info.innerHTML=`<div class="pet-name">${pet.name}</div><span class="rarity-badge" style="background:${rarityColors[pet.rarity]}22;color:${rarityColors[pet.rarity]};border:1px solid ${rarityColors[pet.rarity]}44">${pet.rarity}</span>`;
-  card.appendChild(info);
-  petGrid.appendChild(card);
-  // animate
-  let frame=0;
-  setInterval(()=>{
-    frame=(frame+1)%pet.frames.length;
-    artDiv.textContent=pet.frames[frame];
-  },500+Math.random()*200);
-  observer.observe(card);
-});
-
-// ===== SECRETS =====
-const secrets=[
-  {emoji:'🐾',title:'ASCII Pet Zoo with 18 Hidden Pets',hook:'A full virtual pet system with animations, rarity tiers, and unlockable creatures.',detail:'Claude Code contains a complete ASCII art pet system with 18 different animals. Each pet has multiple animation frames, a rarity system (Common through Legendary), and they animate in your terminal. The capybara is Legendary tier — a nod to the internal model codename.'},
-  {emoji:'🕵️',title:'"Undercover Mode" System Prompt',hook:'Engineers told to hide Anthropic identity in public repos.',detail:'A verbatim system prompt instructs Claude to operate "UNDERCOVER" in public repositories, never revealing internal codenames, model versions, or employee names in commits or PRs. It literally says: "Do not blow your cover."'},
-  {emoji:'🤖',title:'43 Internal Tools (Not 10)',hook:'The public sees ~10 tools. Internally, there are 43.',detail:'Claude Code exposes about 10 tools in public documentation. The source reveals 43 total tools spanning file operations, web browsing, agent spawning, session management, and more — many gated behind internal feature flags.'},
-  {emoji:'📝',title:'Dual System Prompts',hook:'External users get a watered-down version of the real instructions.',detail:'The internal build has dramatically stricter rules: ≤25 words between tool calls, mandatory verification for multi-file edits, "default to NO comments" in code, and explicit instructions to never falsely claim tests pass.'},
-  {emoji:'🧬',title:'Model Codenames: Capybara, Tengu, Numbat',hook:'Internal animal codenames for unreleased models.',detail:'Three internal codenames were found: Capybara (linked to Opus), Tengu (unknown lineage), and Numbat (possibly Sonnet). These are explicitly listed as terms that must never appear in public commits.'},
-  {emoji:'🔢',title:'Unreleased Version Strings',hook:'claude-opus-4-6 and claude-sonnet-4-6 in config files.',detail:'Configuration files reference model version strings like claude-opus-4-6 and claude-sonnet-4-6 that have not been publicly announced, suggesting upcoming model releases.'},
-  {emoji:'🕸️',title:'Multi-Agent Orchestration',hook:'Claude can spawn child agents and manage them.',detail:'The tool system includes agent spawning, session management, and inter-agent communication. Claude Code can create sub-agents, delegate tasks, and coordinate their work — a full orchestration layer.'},
-  {emoji:'🔒',title:'Permission Bypass Mode',hook:'A flag called bypassPermissions exists in the codebase.',detail:'The source contains a permission mode called "bypassPermissions" that skips all safety confirmation dialogs. Used internally for automated pipelines but never exposed to public users.'},
-  {emoji:'📊',title:'512,000 Lines of Code',hook:'The full source is massive — and mostly undocumented.',detail:'The leaked source totals over 512,000 lines across hundreds of files. Much of it is undocumented internal tooling, configuration, and prompt engineering that shapes Claude\'s behavior in ways users never see.'},
-  {emoji:'🎭',title:'Feature Flags Gate Everything',hook:'Most features exist but are disabled for external users.',detail:'A comprehensive feature flag system controls which capabilities are available. Many powerful features — enhanced verification, strict output limits, advanced agent tools — exist in the public build but are gated behind flags only enabled internally.'}
-];
-
-const secretsGrid=document.getElementById('secretsGrid');
-secrets.forEach((s,i)=>{
-  const card=document.createElement('div');
-  card.className='secret-card fade-in';
-  card.style.transitionDelay=`${i*60}ms`;
-  card.innerHTML=`
-    <div class="secret-header">
-      <div class="secret-emoji">${s.emoji}</div>
-      <div><div class="secret-title">${s.title}</div><div class="secret-hook">${s.hook}</div></div>
-      <div class="secret-chevron">▼</div>
-    </div>
-    <div class="secret-body"><p>${s.detail}</p></div>`;
-  card.addEventListener('click',()=>card.classList.toggle('open'));
-  secretsGrid.appendChild(card);
-  observer.observe(card);
-});
-
-// ===== TOOLS =====
-const toolsData=[
-  {name:'Read',cat:'Core'},{name:'Write',cat:'Core'},{name:'Edit',cat:'Core'},{name:'MultiEdit',cat:'Core'},
-  {name:'Glob',cat:'Core'},{name:'Grep',cat:'Core'},{name:'LS',cat:'Core'},{name:'View',cat:'Nav'},
-  {name:'Bash',cat:'Exec'},{name:'Task',cat:'Agent'},{name:'TodoRead',cat:'UX'},{name:'TodoWrite',cat:'UX'},
-  {name:'WebSearch',cat:'Web'},{name:'WebFetch',cat:'Web'},{name:'WebBrowser',cat:'Web'},
-  {name:'NotebookRead',cat:'Core'},{name:'NotebookEdit',cat:'Core'},
-  {name:'Spawn',cat:'Agent'},{name:'Dispatch',cat:'Agent'},{name:'SessionStart',cat:'Session'},
-  {name:'SessionMessage',cat:'Session'},{name:'SessionEnd',cat:'Session'},{name:'SessionList',cat:'Session'},
-  {name:'Navigate',cat:'Nav'},{name:'GoToDefinition',cat:'Nav'},{name:'FindReferences',cat:'Nav'},
-  {name:'Diagnostics',cat:'Nav'},{name:'CodeLens',cat:'Nav'},
-  {name:'ConfigRead',cat:'Config'},{name:'ConfigWrite',cat:'Config'},{name:'PermissionRequest',cat:'Config'},
-  {name:'MemoryRead',cat:'Core'},{name:'MemoryWrite',cat:'Core'},
-  {name:'Think',cat:'Core'},{name:'Compact',cat:'UX'},{name:'Clear',cat:'UX'},
-  {name:'AskFollowup',cat:'UX'},{name:'ProgressUpdate',cat:'UX'},
-  {name:'FileTracker',cat:'Core'},{name:'GitDiff',cat:'Core'},{name:'GitLog',cat:'Core'},
-  {name:'Screenshot',cat:'Web'},{name:'BrowserAction',cat:'Web'}
-];
-
-const categories=[...new Set(toolsData.map(t=>t.cat))].sort();
-const filtersDiv=document.getElementById('toolsFilters');
-filtersDiv.innerHTML=`<button class="filter-btn active" data-cat="all">All (${toolsData.length})</button>`+
-  categories.map(c=>`<button class="filter-btn" data-cat="${c}">${c} (${toolsData.filter(t=>t.cat===c).length})</button>`).join('');
-
-function renderTools(filter='all',search=''){
+function initTools(){
   const grid=document.getElementById('toolsGrid');
-  const filtered=toolsData.filter(t=>{
-    const matchCat=filter==='all'||t.cat===filter;
-    const matchSearch=!search||t.name.toLowerCase().includes(search.toLowerCase());
-    return matchCat&&matchSearch;
-  });
-  grid.innerHTML=filtered.map(t=>`<div class="tool-card"><div class="tool-name">${t.name}</div><span class="tool-cat cat-${t.cat.toLowerCase()}">${t.cat}</span></div>`).join('');
+  const search=document.getElementById('toolsSearch');
+  const filtersDiv=document.getElementById('toolsFilters');
+  const cats=[...new Set(TOOLS.map(t=>t.c))].sort();
+  filtersDiv.innerHTML=`<button class="fbtn active" data-c="all">All (${TOOLS.length})</button>`+cats.map(c=>`<button class="fbtn" data-c="${c}">${c} (${TOOLS.filter(t=>t.c===c).length})</button>`).join('');
+  function render(cat,q){
+    const f=(q||'').toLowerCase();
+    grid.innerHTML=TOOLS.filter(t=>(cat==='all'||t.c===cat)&&(!f||t.n.toLowerCase().includes(f)||t.d.toLowerCase().includes(f))).map(t=>`<div class="tc${t.int?' internal':''}"><div class="tn">${t.n}</div><div class="td">${t.d}</div><span class="tcat cat-${t.c.toLowerCase()}">${t.c}</span></div>`).join('');
+  }
+  render('all','');
+  filtersDiv.addEventListener('click',e=>{if(!e.target.classList.contains('fbtn'))return;filtersDiv.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');render(e.target.dataset.c,search.value)});
+  search.addEventListener('input',e=>{const a=filtersDiv.querySelector('.fbtn.active');render(a?a.dataset.c:'all',e.target.value)});
 }
-renderTools();
 
-filtersDiv.addEventListener('click',e=>{
-  if(!e.target.classList.contains('filter-btn'))return;
-  filtersDiv.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  e.target.classList.add('active');
-  renderTools(e.target.dataset.cat,document.getElementById('toolsSearch').value);
-});
-document.getElementById('toolsSearch').addEventListener('input',e=>{
-  const active=filtersDiv.querySelector('.filter-btn.active');
-  renderTools(active?active.dataset.cat:'all',e.target.value);
+// ===== 10 SECRETS =====
+const SECRETS=[
+  {n:'01',t:"It's an Agent OS, Not a CLI",p:"Process management, IPC, scheduled jobs, a file system, and user-space applications. Claude Code is an operating system for AI agents.",d:"The codebase reveals infrastructure comparable to an operating system: process management (tasks), inter-process communication (SendMessage via Unix Domain Sockets), scheduled jobs (cron), a file system (memdir), and user-space applications (tools).",tag:'architecture'},
+  {n:'02',t:'Memory is Just Markdown Files',p:'No RAG. No vector embeddings. Plain markdown in a directory with an index under 25KB.',d:"The memory system (memdir) stores everything as plain markdown files with an ENTRYPOINT.md index. No Pinecone, no Weaviate. The sophistication is in Dream Mode's 4-phase consolidation cycle that periodically merges, prunes, and resolves contradictions.",tag:'memdir'},
+  {n:'03',t:'Anthropic Uses Claude on Open Source',p:"Undercover mode proves employees routinely use Claude Code on public repos.",d:'The undercover system automatically activates when it detects a non-internal repo. It strips all attribution, model codenames, and Anthropic references. There is NO force-OFF switch. Default is always ON for safety.',tag:'undercover'},
+  {n:'04',t:'Internal Model Codenames Leaked',p:'Capybara, Tengu, Numbat. Plus unreleased versions opus-4-7, sonnet-4-8.',d:'Three animal codenames were found: Capybara (encoded via String.fromCharCode to avoid build scanners), Tengu (feature flag prefix), Numbat (referenced in prompt comments). The undercover prompt explicitly forbids mentioning these in commits.',tag:'models'},
+  {n:'05',t:'The Virtual Pet is Real Engineering',p:'18 species, rarity tiers (1% legendary), ASCII animations, hats, personality stats.',d:'The Buddy system has CompanionBones (species, eye, hat, shiny, stats) derived from hash(userId), and CompanionSoul (name, personality) generated by the model on first hatch. Stats include DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK. Rarity weights: common 60, uncommon 25, rare 10, epic 4, legendary 1.',tag:'buddy'},
+  {n:'06',t:"It Dreams While You're Away",p:'4-phase memory consolidation during idle periods. Like organizing notes in your sleep.',d:'Dream Mode: Orient (ls memory, read index) → Gather (check logs, grep transcripts) → Consolidate (merge, fix dates, delete contradictions) → Prune (keep index under 25KB). It specifically says: "Don\'t exhaustively read transcripts. Look only for things you already suspect matter."',tag:'dream'},
+  {n:'07',t:'KAIROS: The Proactive Assistant',p:'An unreleased feature where Claude initiates conversations and runs scheduled tasks.',d:'KAIROS (behind the KAIROS feature flag) enables proactive behavior: Claude can send messages to the user without being asked, run scheduled tasks via cron, and maintain persistent awareness. The BriefTool and SendUserMessage tools are its interface.',tag:'kairos'},
+  {n:'08',t:'Internal Build Has Stricter Rules',p:'"Default to NO comments." "≤25 words between tool calls." Verification mandatory.',d:'The internal build adds: ≤25 words between tool calls, ≤100 words final responses, mandatory verification for 3+ file edits, "default to NO comments", "never claim all tests pass when output shows failures", and internal-only skills like /commit and /simplify.',tag:'internal'},
+  {n:'09',t:'Species Names Are Obfuscated',p:'String.fromCharCode() because "Capybara" is also an internal model codename.',d:"The types.ts file encodes ALL 18 species names using String.fromCharCode() hex sequences. Comment: \"One species name collides with a model-codename canary in excluded-strings.txt. The check greps build output, so runtime-constructing the value keeps the literal out of the bundle.\"",tag:'obfuscation'},
+  {n:'10',t:'Multi-Agent Teams via Shared Tasks',p:'Agents coordinate through shared task lists, not direct calls. Decoupled lifecycles.',d:'TeamCreate creates a team with a shared task list. Agents are role-based: read-only (Explore, Plan) vs full-capability. Communication uses SendMessage over Unix Domain Sockets (local) or Bridge protocol (cross-machine). Messages arrive as <cross-session-message> XML tags.',tag:'coordinator'}
+];
+
+function initSecrets(){
+  const grid=document.getElementById('secretsGrid');
+  SECRETS.forEach(s=>{
+    const card=document.createElement('div');
+    card.className='sc reveal';
+    card.innerHTML=`<span class="sn">${s.n}</span><h3>${s.t}</h3><p>${s.p}</p><span class="stg">${s.tag}</span><div class="sc-detail"><p>${s.d}</p></div>`;
+    card.addEventListener('click',()=>card.classList.toggle('open'));
+    grid.appendChild(card);
+  });
+}
+
+// ===== FEATURE FLAGS =====
+const FLAGS=[
+  {f:'BUDDY',what:'Virtual pet companion system',s:'Unreleased'},
+  {f:'KAIROS',what:'Full proactive persistent assistant',s:'Unreleased'},
+  {f:'KAIROS_BRIEF',what:'SendUserMessage tool only',s:'Partial'},
+  {f:'PROACTIVE',what:'Earlier proactive iteration',s:'Unreleased'},
+  {f:'CACHED_MICROCOMPACT',what:'Context compression optimization',s:'Internal'},
+  {f:'VERIFICATION_AGENT',what:'Auto-verification subagent',s:'Unreleased'},
+  {f:'EXPERIMENTAL_SKILL_SEARCH',what:'AI-powered skill discovery',s:'Experimental'},
+  {f:'TOKEN_BUDGET',what:'Token budget management',s:'Unreleased'},
+  {f:'UDS_INBOX',what:'Unix Domain Socket messaging',s:'Unreleased'},
+  {f:'AGENT_TRIGGERS',what:'Remote trigger API',s:'Partial (/loop)'},
+];
+
+function initFlags(){
+  const body=document.getElementById('flagsBody');
+  body.innerHTML=FLAGS.map(f=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 12px;font-family:var(--mono);color:var(--green)">${f.f}</td><td style="padding:8px 12px;color:var(--text2)">${f.what}</td><td style="padding:8px 12px;font-family:var(--mono);font-size:.75rem;color:var(--text3)">${f.s}</td></tr>`).join('');
+}
+
+// ===== SCROLL REVEAL =====
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.08});
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded',()=>{
+  initPets();initTools();initSecrets();initFlags();
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 });
 </script>
 </body>
