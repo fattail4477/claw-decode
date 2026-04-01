@@ -1,23 +1,19 @@
 import { build } from 'esbuild';
 
-// Main CLI
 await build({
   entryPoints: ['src/cli.ts'],
   bundle: true,
   platform: 'node',
   target: 'node18',
   format: 'esm',
-  outfile: 'dist/cli.js',
-  banner: { js: '#!/usr/bin/env node' },
+  outfile: 'dist/cli.mjs',
 });
 
-// Live mode
 await build({
   entryPoints: ['src/live.ts'],
   bundle: true,
   platform: 'node',
   target: 'node18',
   format: 'esm',
-  outfile: 'dist/live.js',
-  banner: { js: '#!/usr/bin/env node' },
+  outfile: 'dist/live.mjs',
 });

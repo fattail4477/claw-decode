@@ -234,6 +234,11 @@ var init_roll = __esm({
 
 // src/live.ts
 var live_exports = {};
+import { watch } from "fs";
+import { execSync } from "child_process";
+import { homedir } from "os";
+import { readFileSync, existsSync } from "fs";
+import { join, basename, extname } from "path";
 function pick2(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -325,13 +330,13 @@ function say(text) {
 }
 function detectUserId() {
   const paths = [
-    (0, import_path.join)((0, import_os.homedir)(), ".claude", "config.json"),
-    (0, import_path.join)((0, import_os.homedir)(), ".config", "claude", "config.json")
+    join(homedir(), ".claude", "config.json"),
+    join(homedir(), ".config", "claude", "config.json")
   ];
   for (const p of paths) {
     try {
-      if ((0, import_fs2.existsSync)(p)) {
-        const c = JSON.parse((0, import_fs2.readFileSync)(p, "utf-8"));
+      if (existsSync(p)) {
+        const c = JSON.parse(readFileSync(p, "utf-8"));
         if (c.oauthAccount?.accountUuid) return c.oauthAccount.accountUuid;
         if (c.userID) return c.userID;
       }
@@ -339,21 +344,16 @@ function detectUserId() {
     }
   }
   try {
-    return (0, import_child_process.execSync)("git config --global user.email", { encoding: "utf-8" }).trim() || "anon";
+    return execSync("git config --global user.email", { encoding: "utf-8" }).trim() || "anon";
   } catch {
     return "anon";
   }
 }
-var import_fs, import_child_process, import_os, import_fs2, import_path, R, BOLD, DIM, ITALIC, COLORS, SPECIES_EMOJI, HAT_NAMES, FILE_REACTIONS, IDLE_QUIPS, COMMIT_REACTIONS, HEARTS, bones, color, frame, bubble, bubbleTicks, petTicks, idleCount, BUBBLE_DURATION, TICK_MS, IDLE_SEQ, args, userId, watchDir, lastCommit;
+var R, BOLD, DIM, ITALIC, COLORS, SPECIES_EMOJI, HAT_NAMES, FILE_REACTIONS, IDLE_QUIPS, COMMIT_REACTIONS, HEARTS, bones, color, frame, bubble, bubbleTicks, petTicks, idleCount, BUBBLE_DURATION, TICK_MS, IDLE_SEQ, args, userId, watchDir, lastCommit;
 var init_live = __esm({
   "src/live.ts"() {
     init_roll();
     init_sprites();
-    import_fs = require("fs");
-    import_child_process = require("child_process");
-    import_os = require("os");
-    import_fs2 = require("fs");
-    import_path = require("path");
     R = "\x1B[0m";
     BOLD = "\x1B[1m";
     DIM = "\x1B[2m";
@@ -458,12 +458,12 @@ var init_live = __esm({
     say(`Hi! I'm your ${bones.rarity} ${bones.species}!`);
     watchDir = process.cwd();
     try {
-      const watcher = (0, import_fs.watch)(watchDir, { recursive: true }, (event, filename) => {
+      const watcher = watch(watchDir, { recursive: true }, (event, filename) => {
         if (!filename || filename.includes("node_modules") || filename.includes(".git")) return;
         if (event !== "change") return;
         if (bubbleTicks > 10) return;
-        const ext = (0, import_path.extname)(filename);
-        const reactions = FILE_REACTIONS[ext] || [`${(0, import_path.basename)(filename)} changed.`];
+        const ext = extname(filename);
+        const reactions = FILE_REACTIONS[ext] || [`${basename(filename)} changed.`];
         say(pick2(reactions));
       });
       watcher.on("error", () => {
@@ -472,12 +472,12 @@ var init_live = __esm({
     }
     lastCommit = "";
     try {
-      lastCommit = (0, import_child_process.execSync)("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
+      lastCommit = execSync("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
     } catch {
     }
     setInterval(() => {
       try {
-        const head = (0, import_child_process.execSync)("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
+        const head = execSync("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
         if (head !== lastCommit && lastCommit) {
           lastCommit = head;
           say(pick2(COMMIT_REACTIONS));
@@ -524,10 +524,10 @@ var init_live = __esm({
 // src/cli.ts
 init_roll();
 init_sprites();
-var import_child_process2 = require("child_process");
-var import_os2 = require("os");
-var import_fs3 = require("fs");
-var import_path2 = require("path");
+import { execSync as execSync2 } from "child_process";
+import { homedir as homedir2 } from "os";
+import { readFileSync as readFileSync2, existsSync as existsSync2 } from "fs";
+import { join as join2 } from "path";
 var RESET = "\x1B[0m";
 var BOLD2 = "\x1B[1m";
 var DIM2 = "\x1B[2m";
@@ -575,13 +575,13 @@ var SPECIES_EMOJI2 = {
 };
 function detectUserId2() {
   const configPaths = [
-    (0, import_path2.join)((0, import_os2.homedir)(), ".claude", "config.json"),
-    (0, import_path2.join)((0, import_os2.homedir)(), ".config", "claude", "config.json")
+    join2(homedir2(), ".claude", "config.json"),
+    join2(homedir2(), ".config", "claude", "config.json")
   ];
   for (const p of configPaths) {
     try {
-      if ((0, import_fs3.existsSync)(p)) {
-        const config = JSON.parse((0, import_fs3.readFileSync)(p, "utf-8"));
+      if (existsSync2(p)) {
+        const config = JSON.parse(readFileSync2(p, "utf-8"));
         if (config.oauthAccount?.accountUuid) return config.oauthAccount.accountUuid;
         if (config.userID) return config.userID;
       }
@@ -589,7 +589,7 @@ function detectUserId2() {
     }
   }
   try {
-    const email = (0, import_child_process2.execSync)("git config --global user.email", { encoding: "utf-8" }).trim();
+    const email = execSync2("git config --global user.email", { encoding: "utf-8" }).trim();
     if (email) return email;
   } catch {
   }

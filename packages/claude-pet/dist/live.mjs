@@ -207,11 +207,11 @@ function roll(userId2) {
 }
 
 // src/live.ts
-var import_fs = require("fs");
-var import_child_process = require("child_process");
-var import_os = require("os");
-var import_fs2 = require("fs");
-var import_path = require("path");
+import { watch } from "fs";
+import { execSync } from "child_process";
+import { homedir } from "os";
+import { readFileSync, existsSync } from "fs";
+import { join, basename, extname } from "path";
 var R = "\x1B[0m";
 var BOLD = "\x1B[1m";
 var DIM = "\x1B[2m";
@@ -392,13 +392,13 @@ function say(text) {
 }
 function detectUserId() {
   const paths = [
-    (0, import_path.join)((0, import_os.homedir)(), ".claude", "config.json"),
-    (0, import_path.join)((0, import_os.homedir)(), ".config", "claude", "config.json")
+    join(homedir(), ".claude", "config.json"),
+    join(homedir(), ".config", "claude", "config.json")
   ];
   for (const p of paths) {
     try {
-      if ((0, import_fs2.existsSync)(p)) {
-        const c = JSON.parse((0, import_fs2.readFileSync)(p, "utf-8"));
+      if (existsSync(p)) {
+        const c = JSON.parse(readFileSync(p, "utf-8"));
         if (c.oauthAccount?.accountUuid) return c.oauthAccount.accountUuid;
         if (c.userID) return c.userID;
       }
@@ -406,7 +406,7 @@ function detectUserId() {
     }
   }
   try {
-    return (0, import_child_process.execSync)("git config --global user.email", { encoding: "utf-8" }).trim() || "anon";
+    return execSync("git config --global user.email", { encoding: "utf-8" }).trim() || "anon";
   } catch {
     return "anon";
   }
@@ -428,12 +428,12 @@ process.on("SIGTERM", () => {
 say(`Hi! I'm your ${bones.rarity} ${bones.species}!`);
 var watchDir = process.cwd();
 try {
-  const watcher = (0, import_fs.watch)(watchDir, { recursive: true }, (event, filename) => {
+  const watcher = watch(watchDir, { recursive: true }, (event, filename) => {
     if (!filename || filename.includes("node_modules") || filename.includes(".git")) return;
     if (event !== "change") return;
     if (bubbleTicks > 10) return;
-    const ext = (0, import_path.extname)(filename);
-    const reactions = FILE_REACTIONS[ext] || [`${(0, import_path.basename)(filename)} changed.`];
+    const ext = extname(filename);
+    const reactions = FILE_REACTIONS[ext] || [`${basename(filename)} changed.`];
     say(pick2(reactions));
   });
   watcher.on("error", () => {
@@ -442,12 +442,12 @@ try {
 }
 var lastCommit = "";
 try {
-  lastCommit = (0, import_child_process.execSync)("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
+  lastCommit = execSync("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
 } catch {
 }
 setInterval(() => {
   try {
-    const head = (0, import_child_process.execSync)("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
+    const head = execSync("git rev-parse HEAD 2>/dev/null", { encoding: "utf-8" }).trim();
     if (head !== lastCommit && lastCommit) {
       lastCommit = head;
       say(pick2(COMMIT_REACTIONS));

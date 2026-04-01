@@ -112,7 +112,7 @@ const args = process.argv.slice(2);
 
 // --live mode: launch sidebar companion
 if (args.includes("--live")) {
-  await import("./live.js");
+  require("./live.js");
   process.exit(0);
 }
 
