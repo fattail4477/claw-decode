@@ -16,9 +16,9 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/sprites.ts
-function renderSprite(bones3, frame2 = 0) {
+function renderSprite(bones3, frame = 0) {
   const frames = BODIES[bones3.species];
-  const body = frames[frame2 % frames.length].map(
+  const body = frames[frame % frames.length].map(
     (line) => line.replaceAll("{E}", bones3.eye)
   );
   const lines = [...body];
@@ -242,97 +242,78 @@ import { join, basename, extname } from "path";
 function pick2(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-function clear() {
-  process.stdout.write("\x1B[2J\x1B[H");
-}
-function moveTo(row, col) {
-  process.stdout.write(`\x1B[${row};${col}H`);
-}
-function renderBar(val, w = 12) {
-  const filled = Math.round(val / 100 * w);
-  return "\u2588".repeat(filled) + "\u2591".repeat(w - filled);
+function renderBar(val, w = 10) {
+  const f = Math.round(val / 100 * w);
+  return "\u2588".repeat(f) + "\u2591".repeat(w - f);
 }
 function render() {
   const cols = process.stdout.columns || 24;
-  const rows = process.stdout.rows || 20;
-  clear();
-  let row = 1;
-  moveTo(row++, 1);
-  process.stdout.write(`${BOLD}${color}${SPECIES_EMOJI[bones.species] || "\u{1F43E}"} ${bones.species.toUpperCase()}${R}`);
-  moveTo(row++, 1);
-  process.stdout.write(`${color}${RARITY_STARS[bones.rarity]} ${bones.rarity}${R} ${DIM}${HAT_NAMES[bones.hat]}${R}`);
-  row++;
+  const rows = process.stdout.rows || 24;
+  const lines = [];
+  lines.push(`${BOLD}${color}${SPECIES_EMOJI[bones.species] || "\u{1F43E}"} ${bones.species.toUpperCase()}${R}`);
+  lines.push(`${color}${RARITY_STARS[bones.rarity]} ${bones.rarity}${R} ${DIM}${HAT_NAMES[bones.hat]}${R}`);
+  lines.push("");
   let spriteFrame;
   let blink = false;
   if (bubble || petTicks > 0) {
-    spriteFrame = frame % 2;
+    spriteFrame = tick % 2;
   } else {
-    const step = IDLE_SEQ[frame % IDLE_SEQ.length];
+    const step = IDLE_SEQ[tick % IDLE_SEQ.length];
     if (step === -1) {
       spriteFrame = 0;
       blink = true;
     } else spriteFrame = step % 2;
   }
   if (petTicks > 0) {
-    const heartLine = HEARTS[Math.min(petTicks - 1, HEARTS.length - 1)];
-    moveTo(row++, 1);
-    process.stdout.write(`\x1B[31m${heartLine}${R}`);
+    const h = HEARTS[Math.min(petTicks - 1, HEARTS.length - 1)];
+    lines.push(`\x1B[31m${h}${R}`);
   }
   const sprite = renderSprite(bones, spriteFrame);
   for (const line of sprite) {
-    moveTo(row++, 1);
     const rendered = blink ? line.replaceAll(bones.eye, "-") : line;
-    process.stdout.write(`${color}${rendered}${R}`);
+    lines.push(`${color}${rendered}${R}`);
   }
-  row++;
+  lines.push("");
   if (bubble && bubbleTicks > 0) {
     const fade = bubbleTicks <= 6;
-    const bColor = fade ? DIM : "";
-    const maxW = Math.min(cols - 2, 22);
+    const bc = fade ? DIM : color;
+    const maxW = Math.min(cols - 4, 20);
     const words = bubble.split(" ");
-    const lines = [];
+    const bLines = [];
     let cur = "";
     for (const w of words) {
       if (cur.length + w.length + 1 > maxW && cur) {
-        lines.push(cur);
+        bLines.push(cur);
         cur = w;
       } else cur = cur ? `${cur} ${w}` : w;
     }
-    if (cur) lines.push(cur);
-    const boxW = Math.max(...lines.map((l) => l.length)) + 2;
-    moveTo(row++, 1);
-    process.stdout.write(`${bColor}\u256D${"\u2500".repeat(boxW)}\u256E${R}`);
-    for (const l of lines) {
-      moveTo(row++, 1);
-      process.stdout.write(`${bColor}\u2502 ${ITALIC}${l.padEnd(boxW - 2)}${R}${bColor} \u2502${R}`);
+    if (cur) bLines.push(cur);
+    const boxW = Math.max(...bLines.map((l) => l.length)) + 2;
+    lines.push(`${bc}\u256D${"\u2500".repeat(boxW)}\u256E${R}`);
+    for (const l of bLines) {
+      lines.push(`${bc}\u2502 ${ITALIC}${l.padEnd(boxW - 2)}${R}${bc} \u2502${R}`);
     }
-    moveTo(row++, 1);
-    process.stdout.write(`${bColor}\u2570${"\u2500".repeat(boxW)}\u256F${R}`);
-    row++;
+    lines.push(`${bc}\u2570${"\u2500".repeat(boxW)}\u256F${R}`);
   }
-  if (!bubble && rows > 18) {
-    moveTo(row++, 1);
-    process.stdout.write(`${DIM}\u2500\u2500\u2500 stats \u2500\u2500\u2500${R}`);
-    for (const stat of STAT_NAMES) {
-      const val = bones.stats[stat];
-      const sColor = val >= 80 ? "\x1B[32m" : val >= 50 ? "\x1B[33m" : "\x1B[31m";
-      moveTo(row++, 1);
-      process.stdout.write(`${DIM}${stat.slice(0, 4)}${R} ${sColor}${renderBar(val)}${R} ${DIM}${val}${R}`);
-    }
-    row++;
+  lines.push("");
+  lines.push(`${DIM}\u2500\u2500 stats \u2500\u2500${R}`);
+  for (const stat of STAT_NAMES) {
+    const val = bones.stats[stat];
+    const sc = val >= 80 ? "\x1B[32m" : val >= 50 ? "\x1B[33m" : "\x1B[31m";
+    lines.push(`${DIM}${stat.slice(0, 5).padEnd(5)}${R} ${sc}${renderBar(val)}${R} ${DIM}${val}${R}`);
   }
-  moveTo(rows - 1, 1);
-  process.stdout.write(`${DIM}p:pet t:talk q:quit${R}`);
+  lines.push("");
+  lines.push(`${DIM}p:pet t:talk q:quit${R}`);
+  while (lines.length < rows) lines.push("");
+  process.stdout.write("\x1B[H" + lines.slice(0, rows).map((l) => l + "\x1B[K").join("\n"));
 }
 function say(text) {
   bubble = text;
-  bubbleTicks = BUBBLE_DURATION;
+  bubbleTicks = BUBBLE_MAX;
+  idleCount = 0;
 }
 function detectUserId() {
-  const paths = [
-    join(homedir(), ".claude", "config.json"),
-    join(homedir(), ".config", "claude", "config.json")
-  ];
+  const paths = [join(homedir(), ".claude", "config.json"), join(homedir(), ".config", "claude", "config.json")];
   for (const p of paths) {
     try {
       if (existsSync(p)) {
@@ -349,7 +330,7 @@ function detectUserId() {
     return "anon";
   }
 }
-var R, BOLD, DIM, ITALIC, COLORS, SPECIES_EMOJI, HAT_NAMES, FILE_REACTIONS, IDLE_QUIPS, COMMIT_REACTIONS, HEARTS, bones, color, frame, bubble, bubbleTicks, petTicks, idleCount, BUBBLE_DURATION, TICK_MS, IDLE_SEQ, args, userId, watchDir, lastCommit;
+var R, BOLD, DIM, ITALIC, COLORS, SPECIES_EMOJI, HAT_NAMES, FILE_REACTIONS, IDLE_QUIPS, COMMIT_REACTIONS, HEARTS, bones, color, tick, bubble, bubbleTicks, petTicks, idleCount, BUBBLE_MAX, TICK_MS, IDLE_SEQ, args, userId, cleanup, lastCommit;
 var init_live = __esm({
   "src/live.ts"() {
     init_roll();
@@ -396,70 +377,62 @@ var init_live = __esm({
       tinyduck: "\u{1F424}"
     };
     FILE_REACTIONS = {
-      ".ts": ["TypeScript? Fancy.", "Types are your friend.", "Another .ts file...", "Nice types!"],
-      ".tsx": ["React time!", "Components everywhere.", "JSX goes brrr."],
-      ".js": ["Classic JavaScript.", "No types? Brave.", "JS never dies."],
-      ".css": ["Making it pretty?", "CSS is art.", "Flexbox or grid?", "More CSS? Bold."],
-      ".py": ["Python! \u{1F40D}", "Indentation matters.", "import antigravity"],
-      ".md": ["Documentation! Rare.", "Words, not code. Nice.", "README update?"],
-      ".json": ["Config change?", "JSON is fine.", "Another config file..."]
+      ".ts": ["TypeScript? Fancy.", "Types are your friend.", "Another .ts...", "Nice types!"],
+      ".tsx": ["React time!", "Components go brrr.", "JSX!"],
+      ".js": ["Classic JS.", "No types? Brave.", "JS never dies."],
+      ".css": ["Making it pretty?", "CSS is art.", "Flexbox or grid?"],
+      ".py": ["Python! \u{1F40D}", "Indentation matters."],
+      ".md": ["Docs! Rare.", "README update?"],
+      ".json": ["Config change?", "JSON again..."]
     };
     IDLE_QUIPS = [
       "...",
       "*yawn*",
       "*fidget*",
       "Waiting...",
-      "*blink*",
       "Still here!",
       "*stretch*",
       "Need coffee?",
-      "*hum*",
       "Ship it!",
-      "Looks good to me.",
-      "*nap*",
       "You got this!",
       "Refactor time?",
       "*peek*",
       "Almost there...",
-      "Nice progress."
+      "Nice progress.",
+      "*hum*",
+      "*blink blink*"
     ];
-    COMMIT_REACTIONS = [
-      "Shipped! \u{1F680}",
-      "Another commit!",
-      "Git push?",
-      "Clean commit.",
-      "Nice message.",
-      "History grows.",
-      "Committed!"
-    ];
-    HEARTS = ["   \u2665    \u2665   ", "  \u2665  \u2665   \u2665  ", " \u2665   \u2665  \u2665   ", "\u2665  \u2665      \u2665 ", "\xB7    \xB7   \xB7  "];
-    frame = 0;
+    COMMIT_REACTIONS = ["Shipped! \u{1F680}", "Another commit!", "Clean commit.", "Nice message.", "Committed!"];
+    HEARTS = ["  \u2665    \u2665  ", "\u2665  \u2665   \u2665 ", " \u2665   \u2665  \u2665", "\u2665  \u2665    \u2665", "\xB7   \xB7  \xB7 "];
+    tick = 0;
     bubble = "";
     bubbleTicks = 0;
     petTicks = 0;
     idleCount = 0;
-    BUBBLE_DURATION = 20;
+    BUBBLE_MAX = 20;
     TICK_MS = 500;
     IDLE_SEQ = [0, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0];
     args = process.argv.slice(2).filter((a) => a !== "--live");
     userId = args[0] || detectUserId();
     bones = roll(userId);
     color = COLORS[bones.rarity] || "";
-    process.stdout.write("\x1B[?25l");
-    process.on("exit", () => process.stdout.write("\x1B[?25h"));
+    process.stdout.write("\x1B[?25l\x1B[2J");
+    cleanup = () => {
+      process.stdout.write("\x1B[?25h\x1B[2J\x1B[H");
+    };
+    process.on("exit", cleanup);
     process.on("SIGINT", () => {
-      process.stdout.write("\x1B[?25h");
+      cleanup();
       process.exit(0);
     });
     process.on("SIGTERM", () => {
-      process.stdout.write("\x1B[?25h");
+      cleanup();
       process.exit(0);
     });
     say(`Hi! I'm your ${bones.rarity} ${bones.species}!`);
-    watchDir = process.cwd();
     try {
-      const watcher = watch(watchDir, { recursive: true }, (event, filename) => {
-        if (!filename || filename.includes("node_modules") || filename.includes(".git")) return;
+      const watcher = watch(process.cwd(), { recursive: true }, (event, filename) => {
+        if (!filename || filename.includes("node_modules") || filename.includes(".git") || filename.includes(".next")) return;
         if (event !== "change") return;
         if (bubbleTicks > 10) return;
         const ext = extname(filename);
@@ -492,8 +465,7 @@ var init_live = __esm({
       process.stdin.setEncoding("utf-8");
       process.stdin.on("data", (key) => {
         if (key === "q" || key === "") {
-          process.stdout.write("\x1B[?25h");
-          clear();
+          cleanup();
           process.exit(0);
         }
         if (key === "p") {
@@ -506,14 +478,13 @@ var init_live = __esm({
       });
     }
     setInterval(() => {
-      frame++;
+      tick++;
       if (bubbleTicks > 0) bubbleTicks--;
       if (bubbleTicks === 0 && bubble) bubble = "";
       if (petTicks > 0) petTicks--;
       idleCount++;
-      if (!bubble && idleCount > 60 + Math.random() * 60) {
+      if (!bubble && idleCount > 40 + Math.floor(Math.random() * 40)) {
         say(pick2(IDLE_QUIPS));
-        idleCount = 0;
       }
       render();
     }, TICK_MS);
@@ -603,16 +574,16 @@ function animate(bones3) {
   const color2 = COLORS2[bones3.rarity] || "";
   const sprite0 = renderSprite(bones3, 0);
   const sprite1 = renderSprite(bones3, 1);
-  let frame2 = 0;
+  let frame = 0;
   const interval = setInterval(() => {
-    const sprite = frame2 % 2 === 0 ? sprite0 : sprite1;
-    if (frame2 > 0) process.stdout.write(`\x1B[${sprite.length}A`);
+    const sprite = frame % 2 === 0 ? sprite0 : sprite1;
+    if (frame > 0) process.stdout.write(`\x1B[${sprite.length}A`);
     for (const line of sprite) {
       process.stdout.write(`${color2}    ${line}${RESET}
 `);
     }
-    frame2++;
-    if (frame2 >= 6) {
+    frame++;
+    if (frame >= 6) {
       clearInterval(interval);
       printInfo(bones3);
     }
