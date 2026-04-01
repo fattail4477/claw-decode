@@ -1,3 +1,4 @@
 site/node_modules/
 .vercel/
 site/
+packages/claude-pet/node_modules/
